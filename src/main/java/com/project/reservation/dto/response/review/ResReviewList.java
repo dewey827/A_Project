@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,12 +17,12 @@ public class ResReviewList {
     private Long reviewId;
     private String title;
     private String nickName;
-    private String createdDate;
+    private LocalDateTime createdDate;
     private int views;
     private int likes;
 
     @Builder
-    public ResReviewList(Long reviewId, String title, String nickName, String createdDate, int views, int likes) {
+    public ResReviewList(Long reviewId, String title, String nickName, LocalDateTime createdDate, int views, int likes) {
         this.reviewId = reviewId;
         this.title = title;
         this.nickName = nickName;

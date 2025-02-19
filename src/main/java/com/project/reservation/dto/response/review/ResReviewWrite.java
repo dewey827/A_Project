@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,10 +17,10 @@ public class ResReviewWrite {
     private String title;
     private String nickName;
     private String content;
-    private String createdDate;
+    private LocalDateTime createdDate;
 
     @Builder
-    public ResReviewWrite(Long reviewId, String title, String nickName, String content, String createdDate) {
+    public ResReviewWrite(Long reviewId, String title, String nickName, String content, LocalDateTime createdDate) {
         this.reviewId = reviewId;
         this.title = title;
         this.nickName = nickName;
