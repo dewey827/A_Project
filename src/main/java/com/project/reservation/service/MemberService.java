@@ -4,6 +4,7 @@ import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.response.member.ResMember;
+import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
 import com.project.reservation.repository.MemberRepository;
 import com.project.reservation.security.jwt.CustomUserDetailsService;
@@ -65,27 +66,17 @@ public class MemberService {
     }
     
     // 로그인
-    public ResMember login(ReqMemberLogin memberLoginDto) {
-        authenticate(loginDto.getEmail(), loginDto.getPassword());
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginDto.getEmail());
-        checkEncodePassword(loginDto.getPassword(), userDetails.getPassword());
-        String token = jwtTokenUtil.generateToken(userDetails);
-        return MemberTokenDto.fromEntity(userDetails, token);
-
-        Member member = memberRepository.findByEmail(memberLoginDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        if (!new BCryptPasswordEncoder().matches(memberLoginDto.getPassword(), member.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
-        }
-        return jwtTokenUtil.generateToken(member.getEmail());
-        return ResMember.fromEntity(member);
+    public ResMemberToken login(ReqMemberLogin reqMemberLogin) {
+        // authenticate 메소드에 (로그인 요청 DTO 의 email, 로그인 요청 DTO 의 password)
+        authenticate(reqMemberLogin.getEmail(), reqMemberLogin.getPassword());
+        // customUserDetailsService 에서 반환되는 UserDetails 객체를 foundMember 이름으로 대입
+        UserDetails foundMember = customUserDetailsService.loadUserByUsername(reqMemberLogin.getEmail());
+        // checkEncodePassword 메소드로 DB 에 저장된 암호화된 비밀번호와 같은지 체크
+        checkStoredPasswordInDB(reqMemberLogin.getPassword(), foundMember.getPassword());
+        String token = jwtTokenUtil.generateToken(foundMember);
+        return ResMemberToken.fromEntity(foundMember, token);
     }
 
-    public UserDetails loadUserByUsername(String email) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        return new org.springframework.security.core.userdetails.User(member.getEmail(), member.getPassword(), new ArrayList<>());
-    }
 
 
 
@@ -111,23 +102,27 @@ public class MemberService {
         }
     }
 
-    // 사용자가 입력한 비밀번호가 DB 에 저장된 비밀번호와 같은지 체크
-    private void checkEncodePassword(String rawPassword, String encodedPassword) {
-        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+    // 사용자가 입력한 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
+    private void checkStoredPasswordInDB(String typedPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(typedPassword, encodedPassword)) {
             throw new MemberException("패스워드 불일치", HttpStatus.BAD_REQUEST);
         }
     }
 
     // 사용자 인증
-    private void authenticate(String email, String pwd) {
+    private void authenticate(String email, String password) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, pwd));
+            // 주입받은 authenticationManager 객체로 authenticate 메소드를 호출해 인증 시도
+            // 이메일과 비밀번호를 받은 UsernamePasswordAuthenticationToken 객체를 생성
+            // AuthenticationManager 에 전달 ?
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+            // isEnabled
         } catch (DisabledException e) {
-            throw new MemberException("인증되지 않은 아이디입니다.", HttpStatus.BAD_REQUEST);
+            throw new MemberException("계정이 비활성화 되었습니다.", HttpStatus.BAD_REQUEST);
+            // 비밀번호가 일치하지 않음
         } catch (BadCredentialsException e) {
             throw new MemberException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
     }
-
 
 }
