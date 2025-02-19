@@ -1,33 +1,28 @@
 package com.project.reservation.service;
 
-import com.project.reservation.repository.MemberRepository;
-import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class MailService {
-
+    // 메일링을 위한 JavaMailSender
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "dldudgus827@gmail.com";
     private static int number;
 
-    // 랜덤으로 숫자 생성
+    // createNumber - 6자리 인증번호 랜덤으로 생성 메소드
     public static void createNumber() {
         number = (int)(Math.random() * 900000) + 100000; //(int) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
+
     public MimeMessage CreateMail(String mail) {
+        // 위에서 만든 createNumber 메소드 사용
         createNumber();
         MimeMessage message = javaMailSender.createMimeMessage();
 
