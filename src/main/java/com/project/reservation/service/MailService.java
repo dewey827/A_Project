@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MailService {
-    // 메일링을 위한 JavaMailSender
+    // 메일링을 위한 JavaMailSender 인터페이스
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "dldudgus827@gmail.com";
     private static int number;
