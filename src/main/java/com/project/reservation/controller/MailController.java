@@ -17,8 +17,6 @@ public class MailController {
     private int number = ;// 이메일 인증 숫자를 저장하는 변수
 
 
-
-
     // 인증 이메일 전송
     @PostMapping("/send")
     public HashMap<String, Object> mailSend(@RequestParam("mail") String mail) {

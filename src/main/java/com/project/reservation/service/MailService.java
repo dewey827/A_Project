@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class MailService {
-    // 메일링을 위한 JavaMailSender 인터페이스
+    // 메일링을 위한 JavaMailSender 인터페이스 주입
     private final JavaMailSender javaMailSender;
-    private static final String senderEmail= "dldudgus827@gmail.com";
+    private static final String sender= "dldudgus827@gmail.com";
     private static int number;
 
     // createNumber - 6자리 인증번호 랜덤으로 생성 메소드
@@ -27,7 +27,7 @@ public class MailService {
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
-            message.setFrom(senderEmail);
+            message.setFrom(sender);
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
             message.setSubject("이메일 인증");
             String body = "";
