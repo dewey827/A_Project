@@ -14,6 +14,7 @@ import com.project.reservation.repository.ReviewLikeRepository;
 import com.project.reservation.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -46,14 +48,22 @@ public class ReviewService {
     public ResReviewWrite createReview(ReqReviewWrite reqReviewWrite, Member member) {
         // 요청 데이터를 Review 엔티티로 변환
         Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
+        log.info("리뷰서비스 완료 1");
+
         // 작성자 회원 정보 조회
         Member writerMember = memberRepository.findByEmail(member.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
                 );
+        log.info("리뷰서비스 완료 2");
+
         // 리뷰에 작성자 매핑
         review.setMappingMember(writerMember);
+        log.info("리뷰서비스 완료 3");
+
         // 리뷰 저장
         Review saveReview = reviewRepository.save(review);
+        log.info("리뷰서비스 완료 4");
+
         // 저장된 리뷰 데이터 반환
         return ResReviewWrite.fromEntity(saveReview, writerMember.getNickName());
     }

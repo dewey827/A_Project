@@ -17,15 +17,15 @@ public class ReqMemberRegister {
 
     private String name;
     private String email;
-    private boolean emailVerified = false;  // 이메일 인증 여부
-    private String emailVerificationCode;   //이메일 인증 코드
+//    private boolean emailVerified = false;  // 이메일 인증 여부
+//    private String emailVerificationCode;   //이메일 인증 코드
     private String password;
     private String passwordCheck;
     private String nickName;
     private String addr;
     private String birth;
     private String phone;
-    private List<Pet> pets;
+//    private List<Pet> pets;
 
     @Builder
     public ReqMemberRegister(
@@ -33,14 +33,14 @@ public class ReqMemberRegister {
             String nickName, String addr, String birth, String phone, List<Pet> pets) {
         this.name = name;
         this.email = email;
-        this.emailVerificationCode = emailVerificationCode;
+//        this.emailVerificationCode = emailVerificationCode;
         this.password = password;
         this.passwordCheck = passwordCheck;
         this.nickName = nickName;
         this.addr = addr;
         this.birth = birth;
         this.phone = phone;
-        this.pets = pets;
+//        this.pets = pets;
     }
 
     // DTO -> Entity

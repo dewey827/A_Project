@@ -1,8 +1,10 @@
 package com.project.reservation.service;
 
 import com.project.reservation.common.exception.MemberException;
+import com.project.reservation.common.exception.ResourceNotFoundException;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
+import com.project.reservation.dto.request.member.ReqMemberUpdate;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
@@ -51,17 +53,28 @@ public class MemberService {
     // 회원가입
     public ResMember register(ReqMemberRegister reqMemberRegister) {
         isExistUserEmail(reqMemberRegister.getEmail());
+        log.info("1번 통과");
         isExistUserNickName(reqMemberRegister.getNickName());
+        log.info("2번 통과");
+
         // 비밀번호는 HttpStatus 반환 안함?
         checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
+        log.info("3번 통과");
+
         // 패스워드 암호화
         String encodedPassword = passwordEncoder.encode(reqMemberRegister.getPassword());
+        log.info("4번 통과");
+
         // reqMemberRegister 에 암호화된 패스워드로 set
         reqMemberRegister.setPassword(encodedPassword);
+        log.info("5번 통과");
 
+        // DTO 를 엔티티 객체로 변환, 변환된 Member 엔티티를 데이터베이스에 저장, 변수에 대입
         Member registerMember = memberRepository.save(
                 ReqMemberRegister.ofEntity(reqMemberRegister));
+        log.info("6번 통과");
 
+        // 클라이언트에게 저장된 registerMember 엔티티를  다시 응답 DTO 로 변환해서 반환
         return ResMember.fromEntity(registerMember);
     }
     
@@ -71,15 +84,45 @@ public class MemberService {
         authenticate(reqMemberLogin.getEmail(), reqMemberLogin.getPassword());
         // customUserDetailsService 에서 반환되는 UserDetails 객체를 foundMember 이름으로 대입
         UserDetails foundMember = customUserDetailsService.loadUserByUsername(reqMemberLogin.getEmail());
-        // checkEncodePassword 메소드로 DB 에 저장된 암호화된 비밀번호와 같은지 체크
+        // checkStoredPasswordInDB 메소드로 입력된 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
         checkStoredPasswordInDB(reqMemberLogin.getPassword(), foundMember.getPassword());
+        /** unifiedGenerateToken 로 바꾸는거 고려해보기 **/
+        // foundMember 로 토큰 생성
         String token = jwtTokenUtil.generateToken(foundMember);
+        // 클라이언트에게 응답으로 토큰 보냄
         return ResMemberToken.fromEntity(foundMember, token);
     }
 
+    // 마이페이지 - 비밀번호 확인
+    public ResMember myPageCheck(Member member, String typedPassword) {
+        // 현재 로그인한 멤버 (Member member) 의 정보를 조회, ResMember 로 사용하기 위해 UserDetails 타입을 Member 타입으로 캐스팅
+        Member currentMember = (Member) customUserDetailsService.loadUserByUsername(member.getEmail());
+        // checkStoredPasswordInDB 메소드로 사용자가 입력하는 비밀번호가 DB 의 사용자의 비밀번호와 일치하는지 확인
+        checkStoredPasswordInDB(typedPassword, currentMember.getPassword());
+        log.info("memberservice - myPageCheck 사용됨");
+        // 성공하면 조회된 사용자 정보를 DTO 로 변환하여 반환
+        return ResMember.fromEntity(currentMember);
+    }
 
+    /**
+     *
+    // 수정
+    public ResMember update(Member member, ReqMemberUpdate reqMemberUpdate) {
+        // 업데이트 폼의 새 비밀번호와 비밀번호 확인이 일치하는지 확인
+        checkPassword(reqMemberUpdate.getPassword(), reqMemberUpdate.getPasswordCheck());
+        // 새 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(reqMemberUpdate.getPassword());
+        //
+        Member currentMember =  memberRepository.findByEmail(member.getEmail()).orElseThrow(
+                () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
+        );
+        currentMember.updateMember(encodedPassword, reqMemberUpdate.getNickName(), reqMemberUpdate.getAddr(), reqMemberUpdate.getBirth(), reqMemberUpdate.getPhone());
+        return ResMember.fromEntity(currentMember);
+    }
 
+     탈퇴 등 추후에 **/
 
+    
     // private 메소드들 =========================================================================
     // 이메일 중복체크 - 리파지토리 조회 후 중복시 예외로 HttpStatus
     private void isExistUserEmail(String email) {

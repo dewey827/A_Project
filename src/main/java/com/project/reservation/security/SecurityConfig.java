@@ -52,6 +52,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/login",
                                 "/api/register",
+                                "/email/**",
+
                                 "/question/list",
                                 "/review/list",
                                 "/review/{reviewId}",

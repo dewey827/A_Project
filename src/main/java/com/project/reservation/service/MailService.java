@@ -20,11 +20,11 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "dldudgus827@gmail.com";
-    private static double number;
+    private static int number;
 
     // 랜덤으로 숫자 생성
     public static void createNumber() {
-        number = (Math.random() * (90000)) + 100000; //(int) Math.random() * (최댓값-최소값+1) + 최소값
+        number = (int)(Math.random() * 900000) + 100000; //(int) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
     public MimeMessage CreateMail(String mail) {
@@ -46,7 +46,7 @@ public class MailService {
         return message;
     }
 
-    public double sendMail(String mail) {
+    public int sendMail(String mail) {
         MimeMessage message = CreateMail(mail);
         javaMailSender.send(message);
 
