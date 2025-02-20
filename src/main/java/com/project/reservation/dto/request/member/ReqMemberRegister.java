@@ -1,5 +1,6 @@
 package com.project.reservation.dto.request.member;
 
+import com.project.reservation.dto.request.pet.ReqPet;
 import com.project.reservation.entity.Role;
 import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Pet;
@@ -17,35 +18,33 @@ public class ReqMemberRegister {
 
     private String name;
     private String email;
-//    private boolean emailVerified = false;  // 이메일 인증 여부
-//    private String emailVerificationCode;   //이메일 인증 코드
     private String password;
     private String passwordCheck;
     private String nickName;
     private String addr;
     private String birth;
     private String phone;
-//    private List<Pet> pets;
+    private List<ReqPet> pets;
 
     @Builder
     public ReqMemberRegister(
-            String name, String email, String emailVerificationCode, String password, String passwordCheck,
-            String nickName, String addr, String birth, String phone, List<Pet> pets) {
+            String name, String email,String password, String passwordCheck,
+            String nickName, String addr, String birth, String phone, List<ReqPet> pets) {
         this.name = name;
         this.email = email;
-//        this.emailVerificationCode = emailVerificationCode;
         this.password = password;
         this.passwordCheck = passwordCheck;
         this.nickName = nickName;
         this.addr = addr;
         this.birth = birth;
         this.phone = phone;
-//        this.pets = pets;
+        this.pets = pets;
     }
 
     // DTO -> Entity
     public static Member ofEntity(ReqMemberRegister reqMemberRegister) {
-        return Member.builder()
+
+        Member member = Member.builder()
                 .name(reqMemberRegister.getName())
                 .email(reqMemberRegister.getEmail())
                 .password(reqMemberRegister.getPassword())
@@ -55,5 +54,19 @@ public class ReqMemberRegister {
                 .phone(reqMemberRegister.getPhone())
                 .roles(Role.USER)
                 .build();
+        // 펫 리스트
+        for (ReqPet reqPet : reqMemberRegister.getPets()) {
+            Pet pet = Pet.builder()
+                    .name(reqPet.getName())
+                    .breed(reqPet.getBreed())
+                    .age(reqPet.getAge())
+                    .weight(reqPet.getWeight())
+                    .member(member)
+                    .build();
+
+            member.addPet(pet);
+        }
+        return member;
     }
+
 }

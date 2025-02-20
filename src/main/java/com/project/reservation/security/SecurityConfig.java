@@ -52,7 +52,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/login",
                                 "/api/register",
-                                "/email/**",
+                                "/api/**",
+                                "api/email/**",
+
 
                                 "/question/list",
                                 "/review/list",

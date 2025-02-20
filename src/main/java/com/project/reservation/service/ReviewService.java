@@ -49,6 +49,7 @@ public class ReviewService {
         // 요청 데이터를 Review 엔티티로 변환
         Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
         log.info("리뷰서비스 완료 1");
+        log.info("멤버 객체 전달 확인", member);
 
         // 작성자 회원 정보 조회
         Member writerMember = memberRepository.findByEmail(member.getEmail())

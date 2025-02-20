@@ -5,32 +5,37 @@ import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.service.MemberService;
-import com.project.reservation.service.MailService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
-@RequestMapping("/api")
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class MemberController {
 
     private final MemberService memberService;
 
     // 이메일 중복확인
     @GetMapping("/checkEmail")
-    public ResponseEntity<?> checkIdDuplicate(@RequestParam String email) {
+    public ResponseEntity<?> checkIdDuplicate(@RequestParam(name = "email") String email) {
         memberService.checkIdDuplicate(email);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     // 닉네임 중복확인
     @GetMapping("/checkNickName")
-    public ResponseEntity<?> checkNickNameDuplicate(@RequestParam String nickName) {
+    public ResponseEntity<?> checkNickNameDuplicate(@RequestParam(name = "nickName") String nickName) {
         memberService.checkNickNameDuplicate(nickName);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    // 이메일 인증 확인
+    @GetMapping("/checkEmailVerified")
+    public ResponseEntity<?> checkEmailVerified(@RequestParam(name = "emailVerified") String emailVerified) {
+        memberService.checkEmailVerified(emailVerified);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

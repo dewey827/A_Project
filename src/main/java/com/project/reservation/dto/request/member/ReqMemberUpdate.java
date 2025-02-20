@@ -1,5 +1,6 @@
 package com.project.reservation.dto.request.member;
 
+import com.project.reservation.dto.request.pet.ReqPet;
 import com.project.reservation.entity.Pet;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,10 +20,10 @@ public class ReqMemberUpdate {
     private String addr;
     private String birth;
     private String phone;
-    private List<Pet> pets;
+    private List<ReqPet> pets;
 
     @Builder
-    public ReqMemberUpdate(String password, String passwordCheck, String nickName, String addr, String birth, String phone, List<Pet> pets) {
+    public ReqMemberUpdate(String password, String passwordCheck, String nickName, String addr, String birth, String phone, List<ReqPet> pets) {
         this.password = password;
         this.passwordCheck = passwordCheck;
         this.nickName = nickName;

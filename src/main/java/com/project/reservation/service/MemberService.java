@@ -2,13 +2,16 @@ package com.project.reservation.service;
 
 import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.common.exception.ResourceNotFoundException;
+import com.project.reservation.controller.MailController;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.request.member.ReqMemberUpdate;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
+import com.project.reservation.entity.Pet;
 import com.project.reservation.repository.MemberRepository;
+import com.project.reservation.repository.PetRepository;
 import com.project.reservation.security.jwt.CustomUserDetailsService;
 import com.project.reservation.security.jwt.JwtTokenUtil;
 import jakarta.transaction.Transactional;
@@ -24,7 +27,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -32,22 +37,37 @@ import java.util.ArrayList;
 @Slf4j
 public class MemberService {
 
-    private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
-    private final AuthenticationManager authenticationManager;
+    private final PetRepository petRepository;
     private final CustomUserDetailsService customUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
 
-    // 이메일 중복체크 - private 메소드 실행 후 성공시 HttpStatus 반환
+    // 인증상태를 관리하기 위한 동시성 맵. 키값은 수신자, 값은 true/false
+    private final Map<String, Boolean> verificationStatus = new ConcurrentHashMap<>();
+
+    // 이메일 중복체크 - private 메소드 실행 후 HttpStatus 반환
     public HttpStatus checkIdDuplicate(String email) {
         isExistUserEmail(email);
         return HttpStatus.OK;
     }
 
-    // 닉네임 중복체크  - private 메소드 실행 후 성공시 HttpStatus 반환
+    // 닉네임 중복체크  - private 메소드 실행 후 HttpStatus 반환
     public HttpStatus checkNickNameDuplicate(String nickName) {
         isExistUserNickName(nickName);
         return HttpStatus.OK;
+    }
+
+    // checkEmailVerified
+    public HttpStatus checkEmailVerified(String receiver) {
+        isEmailVerified(receiver);
+        return HttpStatus.OK;
+    }
+
+
+    public void setEmailVerified(String receiver) {
+        verificationStatus.put(receiver, true);
     }
 
     // 회원가입
@@ -57,23 +77,24 @@ public class MemberService {
         isExistUserNickName(reqMemberRegister.getNickName());
         log.info("2번 통과");
 
-        // 비밀번호는 HttpStatus 반환 안함?
-        checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
-        log.info("3번 통과");
+        // 이메일 인증 여부 확인
+        if (isEmailVerified(reqMemberRegister.getEmail())){
+            // 비밀번호는 HttpStatus 반환 안함?
+            checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
+            log.info("3번 통과");
 
-        // 패스워드 암호화
-        String encodedPassword = passwordEncoder.encode(reqMemberRegister.getPassword());
-        log.info("4번 통과");
+            // 패스워드 암호화
+            String encodedPassword = passwordEncoder.encode(reqMemberRegister.getPassword());
+            log.info("4번 통과");
 
-        // reqMemberRegister 에 암호화된 패스워드로 set
-        reqMemberRegister.setPassword(encodedPassword);
-        log.info("5번 통과");
-
+            // reqMemberRegister 에 암호화된 패스워드로 set
+            reqMemberRegister.setPassword(encodedPassword);
+            log.info("5번 통과");
+        }
         // DTO 를 엔티티 객체로 변환, 변환된 Member 엔티티를 데이터베이스에 저장, 변수에 대입
         Member registerMember = memberRepository.save(
                 ReqMemberRegister.ofEntity(reqMemberRegister));
         log.info("6번 통과");
-
         // 클라이언트에게 저장된 registerMember 엔티티를  다시 응답 DTO 로 변환해서 반환
         return ResMember.fromEntity(registerMember);
     }
@@ -122,16 +143,48 @@ public class MemberService {
 
      탈퇴 등 추후에 **/
 
+
+
+    // 회원의 펫 정보 조회
+    public List<Pet> getPetsByMemberId(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Member not found"));
+        return member.getPets();
+    }
+
+//    // 펫 정보 수정
+//    @Transactional
+//    public void updatePet(Long petId, String name, String breed, int age, double weight) {
+//        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+//        pet.updatePet(name, breed, age, weight);
+//        petRepository.save(pet);
+//    }
+//
+//    // 펫 정보 삭제
+//    @Transactional
+//    public void deletePet(Long petId) {
+//        petRepository.deleteById(petId);
+//    }
+
     
     // private 메소드들 =========================================================================
-    // 이메일 중복체크 - 리파지토리 조회 후 중복시 예외로 HttpStatus
+    // 이메일 중복체크 - 리파지토리 조회 후 중복시 예외 처리
     private void isExistUserEmail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
             throw new MemberException("이미 사용 중인 이메일입니다.", HttpStatus.BAD_REQUEST);
         }
     }
 
-    // 닉네임 중복체크 - 리파지토리 조회 후 중복시 예외만 처리
+    // 이메일 인증체크
+    private boolean isEmailVerified(String receiver) {
+        Boolean isVerified = verificationStatus.get(receiver);
+
+        if (isVerified == null || !isVerified) {
+            throw new MemberException("이메일 인증이 필요합니다.", HttpStatus.BAD_REQUEST);
+        }
+        return true;
+    }
+
+    // 닉네임 중복체크 - 리파지토리 조회 후 중복시 예외 처리
     private void isExistUserNickName(String nickName) {
         if (memberRepository.findByNickName(nickName).isPresent()) {
             throw new MemberException("이미 사용 중인 닉네임입니다.", HttpStatus.BAD_REQUEST);

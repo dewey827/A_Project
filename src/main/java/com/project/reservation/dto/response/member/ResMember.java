@@ -20,17 +20,16 @@ public class ResMember {
     private String addr;
     private String birth;
     private String phone;
-    private List<Pet> pets;
+//    private List<Pet> pets; 응답에서 순환참조 문제 발생.
 
     @Builder
-    public ResMember(String name, String email, String password, String nickName, String addr, String birth, String phone, List<Pet> pets) {
+    public ResMember(String name, String email, String password, String nickName, String addr, String birth, String phone) {
         this.name = name;
         this.email = email;
         this.nickName = nickName;
         this.addr = addr;
         this.birth = birth;
         this.phone = phone;
-        this.pets = pets;
     }
 
     // Entity -> DTO
@@ -43,7 +42,6 @@ public class ResMember {
                 .addr(member.getAddr())
                 .birth(member.getBirth())
                 .phone(member.getPhone())
-                .pets(member.getPets())
                 .build();
     }
 }

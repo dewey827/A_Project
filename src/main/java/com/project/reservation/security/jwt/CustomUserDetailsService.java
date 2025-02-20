@@ -24,8 +24,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 리파지토리에서 이메일로 사용자를 찾고, 조회한 UserDetails 객체를 리턴. 없으면 ResourceNotFoundException 발생.
         return this.memberRepository.findByEmail(username).orElseThrow(
-                () -> new ResourceNotFoundException("Member", "Member Email : ", username));
+                () -> new ResourceNotFoundException("Member", "Member Email", username));
     }
+
 }
 
 /*
