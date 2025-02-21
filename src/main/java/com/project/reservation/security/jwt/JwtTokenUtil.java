@@ -4,13 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -25,6 +24,12 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.tokenExpirationTime}") private Integer tokenExpirationTime;
     @Value("${jwt.secret}") private String secret;
 
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get("roles", List.class);
+    }
+
+
     // 1.토큰 생성
     // generateToken - public 으로 선언. String 타입의 JWT 컴팩트 직렬화를 통해 URL-safe 문자열로 변환하여 반환.
     // UserDetailsService 를 구현한 CustomUserDetailsService 에서 반환된, UserDetails 를 구현한 Member 객체를 매개변수로.
@@ -35,9 +40,16 @@ public class JwtTokenUtil implements Serializable {
     // doGenerateToken 메소드로 실제 토큰 생성. 초기화된 claims 맵과 userDetails 객체에서 가져온 사용자 이름(이메일)을 매개변수로 전달.
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        // 사용자의 권한(roles) 정보를 추출
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        List<String> roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        // claims 에 roles 정보 추가
+        claims.put("roles", roles);
         return doGenerateToken(claims, userDetails.getUsername());
     }
-
 
 
     // doGenerateToken - 실제 토큰 생성 로직 구현. 반환 타입은 String, JWT 토큰 문자열을 반환.
@@ -128,6 +140,9 @@ public class JwtTokenUtil implements Serializable {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
+
+
 }
 
 

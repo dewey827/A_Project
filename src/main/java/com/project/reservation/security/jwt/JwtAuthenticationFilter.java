@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -96,10 +100,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // validateToken - 순수 토큰인 authToken 의 토큰에서 추출한 사용자 이름이 UserDetails 객체의 사용자 이름과 일치하고, 토큰이 만료되지 않았다면
             if (this.jwtTokenUtil.validateToken(authToken, userDetails)) {
 
+
+                // JWT에서 roles 정보 추출
+                List<String> roles = jwtTokenUtil.getRolesFromToken(authToken);
+
+                // roles를 GrantedAuthority 객체로 변환
+                List<GrantedAuthority> authorities = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority(role))
+                        .collect(Collectors.toList());
+
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
+                /** 토큰 생성단계에서 Role 추가로 변경
                 // UsernamePasswordAuthenticationToken - ID(principal)와 비밀번호(credentials)를 기반으로 인증을 처리하는 클래스
                 // userDetails 객체, 보안을 위해 비밀번호를 null 로, 사용자의 권한 정보 를 가져와서 authenticationToken 에 대입
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                **/
+
                 // authenticationToken - 인증 객체
                 // authenticationToken 에 추가적인 세부정보 설정.
                 // WebAuthenticationDetailsSource - AuthenticationDetailsSource 인터페이스의 구현체. HttpServletRequest 객체로부터 인증 세부 정보를 생성
@@ -110,6 +129,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.info("인증된 사용자 : " + username + ", Security Context 설정함.");
                 // SecurityContextHolder 에서 현재 SecurityContext 에 생성된 인증객체 authenticationToken 를 설정
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+
+
+
 
             } else {
                 log.info("authToken 의 토큰에서 추출한 사용자 이름이 UserDetails 객체의 사용자 이름과 일치하지 않거나, 토큰이 만료 !!");

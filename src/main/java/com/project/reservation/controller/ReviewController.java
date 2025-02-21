@@ -66,6 +66,7 @@ public class ReviewController {
             @AuthenticationPrincipal Member member
     ) {
         ResReviewWrite saveReviewDTO = reviewService.createReview(reqReviewWrite, member);
+        log.info("롤 정보" + member.getAuthorities());
         return ResponseEntity.status(HttpStatus.CREATED).body(saveReviewDTO);
     }
 

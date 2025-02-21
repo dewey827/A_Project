@@ -126,6 +126,4 @@ public class MemberController {
     /** 수정 삭제 등 추후에 **/
 
 
-
-
 }
