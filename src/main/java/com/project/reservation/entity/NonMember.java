@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+
 public class NonMember extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +22,7 @@ public class NonMember extends BaseTimeEntity {
     private String phoneNum;
 
     @Builder
-    public NonMember(Long id, String name, String phoneNum) {
-        this.id = id;
+    public NonMember(String name, String phoneNum) {
         this.name = name;
         this.phoneNum = phoneNum;
     }

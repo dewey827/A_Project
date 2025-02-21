@@ -1,22 +1,29 @@
 package com.project.reservation.controller;
 
+import com.project.reservation.common.exception.MemberException;
+import com.project.reservation.dto.request.member.ReqMemberFindId;
+import com.project.reservation.dto.request.member.ReqMemberFindPw;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
+import com.project.reservation.service.MailService;
 import com.project.reservation.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
 public class MemberController {
 
     private final MemberService memberService;
+    private final MailService mailService;
 
     // 이메일 중복확인
     @GetMapping("/checkEmail")
@@ -57,7 +64,68 @@ public class MemberController {
 //                .body(resMemberToken);
     }
 
+    //====================================================================================================
+    // 이메일 찾기
+    @PostMapping("/findId")
+    public ResponseEntity<String> findId(
+            @RequestBody ReqMemberFindId reqMemberFindId){
+        String memberEmail = memberService.findEmail(reqMemberFindId.getName(), reqMemberFindId.getPhone());
+
+        return ResponseEntity.ok("귀하의 이메일 입니다. : " + memberEmail);
+    }
+
+    @PostMapping("/findPw")
+    public ResponseEntity<?> findPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
+
+        if (memberService.isEmailExist(reqMemberFindPw.getEmail())) {
+
+            mailService.sendMail(reqMemberFindPw.getEmail());
+            return ResponseEntity.ok("비밀번호 재설정 인증 메일이 전송되었습니다.");
+        } else {
+
+            return ResponseEntity.badRequest().body("등록되지 않은 이메일입니다.");
+        }
+    }
+    @PostMapping("/findPw/verify")
+    public ResponseEntity<?> verifyCode(@RequestBody ReqMemberFindPw reqMemberFindPw) {
+
+        if (mailService.verifyCode(reqMemberFindPw.getEmail(), reqMemberFindPw.getCode())) {
+
+            return ResponseEntity.ok("인증 코드가 확인되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("잘못된 인증 코드입니다.");
+        }
+    }
+
+    @PostMapping("/findPw/checkPassword")
+    public ResponseEntity<?> checkPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
+        try {
+            memberService.checkPassword(reqMemberFindPw.getNewPassword(), reqMemberFindPw.getNewPasswordCheck());
+            return ResponseEntity.ok("비밀번호가 일치합니다.");
+        } catch (MemberException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @PostMapping("/findPw/resetPw")
+    public ResponseEntity<?> resetPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
+        if (mailService.verifyCode(reqMemberFindPw.getEmail(), reqMemberFindPw.getCode())) {
+            try {
+                memberService.checkPassword(reqMemberFindPw.getNewPassword(), reqMemberFindPw.getNewPasswordCheck());
+                return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
+            } catch (MemberException e) {
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            return ResponseEntity.badRequest().body("인증 실패 또는 만료된 코드입니다.");
+        }
+    }
+
+
     /** 수정 삭제 등 추후에 **/
+
+
 
 
 }

@@ -44,8 +44,37 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
 
+    public String findEmail(String name, String phone) {
+        Member member = memberRepository.findByNameAndPhone(name, phone)
+                .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+        return member.getEmail();
+    }
+
+    public boolean isEmailExist(String email) {
+        return memberRepository.findByEmail(email).isPresent();
+    }
+
+
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
+
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        member.resetPassword(encodedPassword);
+    }
+
+
+    //=========================================================================================================
     // 인증상태를 관리하기 위한 동시성 맵. 키값은 수신자, 값은 true/false
     private final Map<String, Boolean> verificationStatus = new ConcurrentHashMap<>();
+
+    // 비밀번호와 비밀번호 확인 같은지 체크
+    public void checkPassword(String password, String passwordCheck) {
+        if (!password.equals(passwordCheck)) {
+            throw new MemberException("비밀번호 확인 불일치", HttpStatus.BAD_REQUEST);
+        }
+    }
 
     // 이메일 중복체크 - private 메소드 실행 후 HttpStatus 반환
     public HttpStatus checkIdDuplicate(String email) {
@@ -65,7 +94,7 @@ public class MemberService {
         return HttpStatus.OK;
     }
 
-
+    // 이메일 체크 여부
     public void setEmailVerified(String receiver) {
         verificationStatus.put(receiver, true);
     }
@@ -73,28 +102,22 @@ public class MemberService {
     // 회원가입
     public ResMember register(ReqMemberRegister reqMemberRegister) {
         isExistUserEmail(reqMemberRegister.getEmail());
-        log.info("1번 통과");
         isExistUserNickName(reqMemberRegister.getNickName());
-        log.info("2번 통과");
 
         // 이메일 인증 여부 확인
         if (isEmailVerified(reqMemberRegister.getEmail())){
             // 비밀번호는 HttpStatus 반환 안함?
             checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
-            log.info("3번 통과");
 
             // 패스워드 암호화
             String encodedPassword = passwordEncoder.encode(reqMemberRegister.getPassword());
-            log.info("4번 통과");
 
             // reqMemberRegister 에 암호화된 패스워드로 set
             reqMemberRegister.setPassword(encodedPassword);
-            log.info("5번 통과");
         }
         // DTO 를 엔티티 객체로 변환, 변환된 Member 엔티티를 데이터베이스에 저장, 변수에 대입
         Member registerMember = memberRepository.save(
                 ReqMemberRegister.ofEntity(reqMemberRegister));
-        log.info("6번 통과");
         // 클라이언트에게 저장된 registerMember 엔티티를  다시 응답 DTO 로 변환해서 반환
         return ResMember.fromEntity(registerMember);
     }
@@ -144,7 +167,6 @@ public class MemberService {
      탈퇴 등 추후에 **/
 
 
-
     // 회원의 펫 정보 조회
     public List<Pet> getPetsByMemberId(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Member not found"));
@@ -191,12 +213,6 @@ public class MemberService {
         }
     }
 
-    // 비밀번호와 비밀번호 확인 같은지 체크
-    private void checkPassword(String password, String passwordCheck) {
-        if (!password.equals(passwordCheck)) {
-            throw new MemberException("비밀번호 확인 불일치", HttpStatus.BAD_REQUEST);
-        }
-    }
 
     // 사용자가 입력한 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
     private void checkStoredPasswordInDB(String typedPassword, String encodedPassword) {

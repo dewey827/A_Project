@@ -52,14 +52,20 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/login",
                                 "/api/register",
-                                "/api/**",
+
                                 "api/email/**",
 
+                                "api/findId",
+                                "api/findPw/**",
+
+
+
+
+                                "/reservation/nonmember/**",
+
+                                "/review/**",
 
                                 "/question/list",
-                                "/review/list",
-                                "/review/{reviewId}",
-                                "/review/{reviewId}/comment/list",
                                 "/notice/list",
                                 "/notice/{noticeId}",
                                 "/notice/{noticeId}/file/list",
@@ -68,7 +74,12 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/member/**").hasRole("USER")      // 추가 필요
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN"))     // 추가 필요
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+//                        .anyRequest().permitAll()
+                )     // 추가 필요
+
+
 
                 // 서버가 클라이언트 세션을 유지하지 않도록 무상태로 설정 메소드
                 // 보안예외처리 구성 메소드. authenticationEntryPoint - 인증되지 않은 사용자가 보호된 리소스에 접근하려 할 때의 동작을 정의.

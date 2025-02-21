@@ -81,6 +81,10 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.phone = phone;
     }
 
+    public void resetPassword(String newPassword){
+        this.password = newPassword;
+    }
+
     // 동물 추가
     public void addPet(Pet pet) {
         pet.setMember(this);

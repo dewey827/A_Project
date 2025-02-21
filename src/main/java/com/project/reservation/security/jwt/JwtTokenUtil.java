@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 // Serializable 인터페이스 구현. 현재 클래스의 객체를 직렬화한다.
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -24,7 +26,6 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.secret}") private String secret;
 
     // 1.토큰 생성
-
     // generateToken - public 으로 선언. String 타입의 JWT 컴팩트 직렬화를 통해 URL-safe 문자열로 변환하여 반환.
     // UserDetailsService 를 구현한 CustomUserDetailsService 에서 반환된, UserDetails 를 구현한 Member 객체를 매개변수로.
     // HashMap 객체 생성, 토큰에 포함될 클레임을 저장하는 Map 객체를 claims 라는 변수로 초기화하여 키(String)와 값(Object)의 쌍으로 저장.
@@ -36,6 +37,8 @@ public class JwtTokenUtil implements Serializable {
         Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, userDetails.getUsername());
     }
+
+
 
     // doGenerateToken - 실제 토큰 생성 로직 구현. 반환 타입은 String, JWT 토큰 문자열을 반환.
     // userDetails.getUsername()을 호출하여 얻은 값이 String subject 로 전달되며, 이 값이 JWT 의 주체

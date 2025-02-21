@@ -13,10 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -49,7 +51,10 @@ public class ReviewController {
 
     // 리뷰 상세조회
     @GetMapping("/{reviewId}")
-    public ResponseEntity<ResReviewDetail> detail(@PathVariable("reviewId") Long reviewId) {
+    public ResponseEntity<ResReviewDetail> detail(
+            @PathVariable("reviewId")
+            @Param("reviewId") Long reviewId
+    ) {
         ResReviewDetail getDetail = reviewService.readReview(reviewId);
         return ResponseEntity.status(HttpStatus.OK).body(getDetail);
     }
@@ -58,8 +63,8 @@ public class ReviewController {
     @PostMapping("/write")
     public ResponseEntity<ResReviewWrite> write(
             @RequestBody ReqReviewWrite reqReviewWrite,
-//            @AuthenticationPrincipal
-            Member member) {
+            @AuthenticationPrincipal Member member
+    ) {
         ResReviewWrite saveReviewDTO = reviewService.createReview(reqReviewWrite, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveReviewDTO);
     }
@@ -67,15 +72,18 @@ public class ReviewController {
     // 리뷰 수정
     @PatchMapping("/{reviewId}/update")
     public ResponseEntity<ResReviewDetail> update(
-            @PathVariable Long reviewId,
+            @PathVariable("reviewId") Long reviewId,
             @RequestBody ReqReviewUpdate reqReviewUpdate) {
+        log.info("00");
         ResReviewDetail updateReviewDTO = reviewService.updateReview(reviewId, reqReviewUpdate);
+        log.info("01");
         return ResponseEntity.status(HttpStatus.OK).body(updateReviewDTO);
     }
     
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}/delete")
-    public ResponseEntity<Long> delete(@PathVariable Long reviewId) {
+    public ResponseEntity<Long> delete(
+            @PathVariable("reviewId") Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

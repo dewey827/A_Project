@@ -35,6 +35,7 @@ public class ResReviewWrite {
                 .reviewId(review.getId())
                 .title(review.getTitle())
                 .nickName(nickName)
+                .content(review.getContent())
                 .createdDate(review.getCreatedDate())
                 .build();
     }

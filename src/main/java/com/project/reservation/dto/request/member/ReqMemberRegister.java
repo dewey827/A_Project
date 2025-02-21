@@ -44,7 +44,7 @@ public class ReqMemberRegister {
     // DTO -> Entity
     public static Member ofEntity(ReqMemberRegister reqMemberRegister) {
 
-        Member member = Member.builder()
+        return  Member.builder()
                 .name(reqMemberRegister.getName())
                 .email(reqMemberRegister.getEmail())
                 .password(reqMemberRegister.getPassword())
@@ -54,19 +54,7 @@ public class ReqMemberRegister {
                 .phone(reqMemberRegister.getPhone())
                 .roles(Role.USER)
                 .build();
-        // 펫 리스트
-        for (ReqPet reqPet : reqMemberRegister.getPets()) {
-            Pet pet = Pet.builder()
-                    .name(reqPet.getName())
-                    .breed(reqPet.getBreed())
-                    .age(reqPet.getAge())
-                    .weight(reqPet.getWeight())
-                    .member(member)
-                    .build();
 
-            member.addPet(pet);
-        }
-        return member;
     }
 
 }

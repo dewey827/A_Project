@@ -14,17 +14,20 @@ public class ReqReviewWrite {
 
     private String title;
     private String content;
+    private String nickName;
 
     @Builder
-    public ReqReviewWrite(String title, String content) {
+    public ReqReviewWrite(String title, String content, String nickName) {
         this.title = title;
         this.content = content;
+        this.nickName = nickName;
     }
 
     public static Review ofEntity(ReqReviewWrite reqReviewWrite){
         return Review.builder()
                 .title(reqReviewWrite.title)
                 .content(reqReviewWrite.content)
+                .nickName(reqReviewWrite.nickName)
                 .build();
     }
 }
