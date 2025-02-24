@@ -38,7 +38,7 @@ public class ResReviewDetail {
     }
 
     // Entity -> DTO
-    public static ResReviewDetail fromEntity(Review review, boolean hasLiked){
+    public static ResReviewDetail fromEntity(Review review){
         return ResReviewDetail.builder()
                 .reviewId(review.getId())
                 .title(review.getTitle())
@@ -47,7 +47,7 @@ public class ResReviewDetail {
                 .createdDate(review.getCreatedDate())
                 .views(review.getViews())
                 .likes(review.getLikes())
-                .hasLiked(hasLiked)
+
                 .build();
     }
 }

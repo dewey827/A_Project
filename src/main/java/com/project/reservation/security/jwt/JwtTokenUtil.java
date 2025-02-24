@@ -29,7 +29,6 @@ public class JwtTokenUtil implements Serializable {
         return claims.get("roles", List.class);
     }
 
-
     // 1.토큰 생성
     // generateToken - public 으로 선언. String 타입의 JWT 컴팩트 직렬화를 통해 URL-safe 문자열로 변환하여 반환.
     // UserDetailsService 를 구현한 CustomUserDetailsService 에서 반환된, UserDetails 를 구현한 Member 객체를 매개변수로.
@@ -143,35 +142,23 @@ public class JwtTokenUtil implements Serializable {
 
 
 
+
+    public String refreshToken(String token) {
+        final Date createdDate = new Date();
+        final Date expirationDate = calculateExpirationDate(createdDate);
+
+        final Claims claims = getAllClaimsFromToken(token);
+        claims.setIssuedAt(createdDate);
+        claims.setExpiration(expirationDate);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+    }
+
+    private Date calculateExpirationDate(Date createdDate) {
+        return new Date(createdDate.getTime() + tokenExpirationTime * 1000);
+    }
+
 }
-
-
-//  (봉인) 내가 만들던거 일단 봉인
-//    private final String SECRET_KEY = "secret";
-//
-//    public String generateToken(String email) {
-//        return Jwts.builder()
-//                .setSubject(email)
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10시간 유효
-//                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-//                .compact();
-//    }
-//
-//    public boolean validateToken(String token, UserDetails userDetails) {
-//        final String email = extractEmail(token);
-//        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
-//    }
-//
-//    public String extractEmail(String token) {
-//        return extractAllClaims(token).getSubject();
-//    }
-//
-//    private Claims extractAllClaims(String token) {
-//        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-//    }
-//
-//    private boolean isTokenExpired(String token) {
-//        return extractAllClaims(token).getExpiration().before(new Date());
-//    }
-//}

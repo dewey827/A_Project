@@ -2,6 +2,8 @@ package com.project.reservation.security;
 
 import com.project.reservation.security.jwt.JwtAuthenticationEntryPoint;
 import com.project.reservation.security.jwt.JwtAuthenticationFilter;
+import com.project.reservation.security.oauth2.CustomOAuth2UserService;
+import com.project.reservation.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -22,6 +29,38 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+
+
+    //===============
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @Bean
+    public ClientRegistrationRepository clientRegistrationRepository() {
+        return new InMemoryClientRegistrationRepository(googleClientRegistration());
+    }
+
+    private ClientRegistration googleClientRegistration() {
+        return ClientRegistration.withRegistrationId("google")
+                .clientId("your-client-id")
+                .clientSecret("your-client-secret")
+//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+                .scope("profile", "email")
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                .tokenUri("https://www.googleapis.com/oauth2/v4/token")
+                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .userNameAttributeName(IdTokenClaimNames.SUB)
+                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+                .clientName("Google")
+                .build();
+    }
+
+
+    //===================
+
 
     // AuthenticationManager - 인증을 담당하는 매니저. 사용자의 인증 정보(ID, 비밀번호 등)를 검증하고 인증 결과를 반환하는 역할
     // AuthenticationManager 를 생성하려면 AuthenticationConfiguration 을 주입받아서, getAuthenticationManager 메소드를 실행해야 함
@@ -46,37 +85,47 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
+
+
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler))
+
+
+
+
                 // authorizeHttpRequests - HTTP 요청에 대한 인가 규칙 설정을 시작 메소드
                 // requestMatchers - 특정 HTTP 요청에 대한 보안 규칙을 정의하는 데 사용되는 메소드
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/login",
                                 "/api/register",
-
                                 "api/email/**",
-
                                 "api/findId",
                                 "api/findPw/**",
 
-
-
+                                "api/**",
+                                "login/**",
 
                                 "/reservation/nonmember/**",
-
                                 "/review/**",
-
                                 "/question/list",
                                 "/notice/list",
                                 "/notice/{noticeId}",
                                 "/notice/{noticeId}/file/list",
-                                "/notice/{noticeId}/file/download/**").permitAll()      // 추가 필요
+                                "/notice/{noticeId}/file/download/**",
+                                "accounts.google.com/",
 
+                                "/oauth2/**"
+
+                        ).permitAll()      // 추가 필요
 
                         .requestMatchers("/api/member/**").hasRole("USER")      // 추가 필요
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-//                        .anyRequest().permitAll()
+                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )     // 추가 필요
 
 
@@ -88,6 +137,15 @@ public class SecurityConfig {
                 // HttpSecurity 객체에 설정된 모든 보안 구성을 바탕으로 최종적인 SecurityFilterChain 객체를 생성
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(excep -> excep.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+
+
+//                .oauth2Login((auth) -> auth.loginPage("/oauth-login/login")
+//                        .defaultSuccessUrl("/oauth-login")
+//                        .failureUrl("/oauth-login/login")
+//                )
+
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

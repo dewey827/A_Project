@@ -28,7 +28,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 500)
     private String password;
 
     @Column(nullable = false, length = 10)
@@ -47,6 +47,9 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Column(name = "roles", nullable = false)
     private Role roles;
 
+    private String provider;
+    private String providerId;
+
     //=============================================================
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Pet> pets = new ArrayList<>();
@@ -57,10 +60,10 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     public List<Comment> comments = new ArrayList<>();
 
-    // Member 에 like 를 필드로 가지고 있을 필요 없음
     //=============================================================
     @Builder
-    public Member(String name, String email, String password, String nickName, String addr, String birth, String phone, Role roles) {
+    public Member(String name, String email, String password, String nickName, String addr,
+                  String birth, String phone, Role roles, String provider, String providerId) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -69,8 +72,14 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.birth = birth;
         this.phone = phone;
         this.roles = roles;
+        this.provider = provider;
+        this.providerId = providerId;
     }
 
+    public void updateOAuth2Info(String provider, String providerId) {
+        this.provider = provider;
+        this.providerId = providerId;
+    }
     //======================================================================================
     // 수정
     public void updateMember(String password, String nickName, String addr, String birth, String phone) {
@@ -95,6 +104,13 @@ public class Member extends BaseTimeEntity implements UserDetails {
     public void removePet(Pet pet) {
         pet.setMember(null);
         this.pets.remove(pet);
+    }
+
+
+
+    public Member update(String name) {
+        this.name = name;
+        return this;
     }
 
     //======================================================================================

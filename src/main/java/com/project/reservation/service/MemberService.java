@@ -6,6 +6,7 @@ import com.project.reservation.controller.MailController;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.request.member.ReqMemberUpdate;
+import com.project.reservation.dto.request.member.ReqOAuth2;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
@@ -167,7 +168,26 @@ public class MemberService {
      탈퇴 등 추후에 **/
 
 
-    // 회원의 펫 정보 조회
+
+    public Member createOrUpdateOAuth2Member(ReqOAuth2 reqOAuth2) {
+        return memberRepository.findByEmail(reqOAuth2.getEmail())
+                .map(existingMember -> updateExistingMember(existingMember, reqOAuth2))
+                .orElseGet(() -> createNewOAuth2Member(reqOAuth2));
+    }
+
+    private Member updateExistingMember(Member existingMember, ReqOAuth2 reqOAuth2) {
+        existingMember.updateOAuth2Info(reqOAuth2.getProvider(), reqOAuth2.getProviderId());
+        return memberRepository.save(existingMember);
+    }
+
+    private Member createNewOAuth2Member(ReqOAuth2 reqOAuth2) {
+        return memberRepository.save(reqOAuth2.ofEntity(reqOAuth2));
+    }
+
+
+    //=================================================================================================================
+
+// 회원의 펫 정보 조회
     public List<Pet> getPetsByMemberId(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Member not found"));
         return member.getPets();

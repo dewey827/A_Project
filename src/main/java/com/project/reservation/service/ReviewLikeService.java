@@ -62,7 +62,7 @@ public class ReviewLikeService {
 
         boolean hasLiked = reviewLikeRepository.existsByReviewAndMember(review, member);
 
-        return ResReviewDetail.fromEntity(review, hasLiked);
+//        return ResReviewDetail.fromEntity(review, hasLiked);
         //특정 사용자가 특정 리뷰를 좋아요했는지 여부 반환
         return reviewLikeRepository.existsByReviewAndMember(review, member);
     }

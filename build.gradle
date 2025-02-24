@@ -56,6 +56,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test' // 단위 테스트와 통합 테스트를 위한 Spring Boot 테스트 지원을 제공
 	testImplementation 'org.springframework.security:spring-security-test' // Spring Security 테스트 지원을 제공
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // JUnit 플랫폼 런처를 테스트 시에만 포함
+
+
+
+
+	// OAuth 2
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 }
 
 tasks.named('test') {
