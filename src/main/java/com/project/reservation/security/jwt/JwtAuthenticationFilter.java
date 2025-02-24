@@ -132,8 +132,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
 
-
-
             } else {
                 log.info("authToken 의 토큰에서 추출한 사용자 이름이 UserDetails 객체의 사용자 이름과 일치하지 않거나, 토큰이 만료 !!");
             }

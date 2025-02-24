@@ -13,10 +13,12 @@ public class ReqReviewUpdate {
 
     private String title;
     private String content;
+    private String nickName;
 
     @Builder
-    public ReqReviewUpdate(String title, String content) {
+    public ReqReviewUpdate(String title, String content, String nickName) {
         this.title = title;
         this.content = content;
+        this.nickName = nickName;
     }
 }

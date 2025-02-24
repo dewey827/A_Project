@@ -120,8 +120,8 @@ public class ReviewService {
 
     // 리뷰에 포함된 총 좋아요 개수 확인
     public int getLikes(Long reviewId) {
-        // 리뷰 ID로 조회, 없으면 예외
-        long likeCount = reviewRepository.countLikesByReview(reviewId);
+        // 리뷰 ID로 조회
+        int likeCount = reviewRepository.countLikesByReview(reviewId);
         // 좋아요 개수 계산
         return (int)likeCount;
     }

@@ -91,7 +91,9 @@ public class ReviewController {
 
     // GET - 리뷰에 포함된 총 좋아요 개수 반환 API
     @GetMapping("/{reviewId}/likes")
-    public ResponseEntity<Integer> getLikes(@PathVariable("reviewId") Long reviewId) {
+    public ResponseEntity<Integer> getLikes(
+            @PathVariable("reviewId")
+            @Param("reviewId") Long reviewId) {
         int likes = reviewService.getLikes(reviewId);
         return ResponseEntity.status(HttpStatus.OK).body(likes);
     }

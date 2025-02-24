@@ -21,5 +21,4 @@ public class NonMemberService {
     public List<NonMember> getAllNonMembers() {
         return nonMemberRepository.findAll();
     }
-
 }

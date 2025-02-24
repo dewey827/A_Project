@@ -103,7 +103,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE." + this.roles.name()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.roles.name()));
         return authorities;
     }
 
