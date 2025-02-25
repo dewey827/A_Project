@@ -2,11 +2,10 @@ package com.project.reservation.service;
 
 import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.common.exception.ResourceNotFoundException;
-import com.project.reservation.controller.MailController;
+import com.project.reservation.dto.request.member.ReqMemberFindPw;
 import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.request.member.ReqMemberUpdate;
-import com.project.reservation.dto.request.member.ReqOAuth2;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
@@ -45,6 +44,8 @@ public class MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
 
+
+    // 아이디 찾기
     public String findEmail(String name, String phone) {
         Member member = memberRepository.findByNameAndPhone(name, phone)
                 .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
@@ -70,12 +71,12 @@ public class MemberService {
     // 인증상태를 관리하기 위한 동시성 맵. 키값은 수신자, 값은 true/false
     private final Map<String, Boolean> verificationStatus = new ConcurrentHashMap<>();
 
-    // 비밀번호와 비밀번호 확인 같은지 체크
-    public void checkPassword(String password, String passwordCheck) {
-        if (!password.equals(passwordCheck)) {
-            throw new MemberException("비밀번호 확인 불일치", HttpStatus.BAD_REQUEST);
-        }
-    }
+//    // 비밀번호와 비밀번호 확인 같은지 체크 - 프론트에서
+//    public void checkPassword(String password, String passwordCheck) {
+//        if (!password.equals(passwordCheck)) {
+//            throw new MemberException("비밀번호 확인 불일치", HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
     // 이메일 중복체크 - private 메소드 실행 후 HttpStatus 반환
     public HttpStatus checkIdDuplicate(String email) {
@@ -107,8 +108,7 @@ public class MemberService {
 
         // 이메일 인증 여부 확인
         if (isEmailVerified(reqMemberRegister.getEmail())){
-            // 비밀번호는 HttpStatus 반환 안함?
-            checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
+//            checkPassword(reqMemberRegister.getPassword(), reqMemberRegister.getPasswordCheck());
 
             // 패스워드 암호화
             String encodedPassword = passwordEncoder.encode(reqMemberRegister.getPassword());
@@ -149,15 +149,13 @@ public class MemberService {
         return ResMember.fromEntity(currentMember);
     }
 
-    /**
-     *
     // 수정
     public ResMember update(Member member, ReqMemberUpdate reqMemberUpdate) {
-        // 업데이트 폼의 새 비밀번호와 비밀번호 확인이 일치하는지 확인
-        checkPassword(reqMemberUpdate.getPassword(), reqMemberUpdate.getPasswordCheck());
+//        // 업데이트 폼의 새 비밀번호와 비밀번호 확인이 일치하는지 확인
+//        checkPassword(reqMemberUpdate.getPassword(), reqMemberUpdate.getPasswordCheck());
         // 새 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(reqMemberUpdate.getPassword());
-        //
+
         Member currentMember =  memberRepository.findByEmail(member.getEmail()).orElseThrow(
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
@@ -165,24 +163,36 @@ public class MemberService {
         return ResMember.fromEntity(currentMember);
     }
 
-     탈퇴 등 추후에 **/
+    // 비밀번호 찾기 - 비밀번호 재설정
+    public ResMember resetMemberPassword(ReqMemberFindPw reqMemberFindPw) {
+        Member member = memberRepository.findByEmail(reqMemberFindPw.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Member", "Email", reqMemberFindPw.getEmail()));
 
+        String encodedPassword = passwordEncoder.encode(reqMemberFindPw.getNewPassword());
+        member.resetPassword(encodedPassword);
+        memberRepository.save(member);
 
-
-    public Member createOrUpdateOAuth2Member(ReqOAuth2 reqOAuth2) {
-        return memberRepository.findByEmail(reqOAuth2.getEmail())
-                .map(existingMember -> updateExistingMember(existingMember, reqOAuth2))
-                .orElseGet(() -> createNewOAuth2Member(reqOAuth2));
+        return ResMember.fromEntity(member);
     }
 
-    private Member updateExistingMember(Member existingMember, ReqOAuth2 reqOAuth2) {
-        existingMember.updateOAuth2Info(reqOAuth2.getProvider(), reqOAuth2.getProviderId());
-        return memberRepository.save(existingMember);
-    }
 
-    private Member createNewOAuth2Member(ReqOAuth2 reqOAuth2) {
-        return memberRepository.save(reqOAuth2.ofEntity(reqOAuth2));
-    }
+
+
+//      Oauth2
+//    public Member createOrUpdateOAuth2Member(ReqOAuth2 reqOAuth2) {
+//        return memberRepository.findByEmail(reqOAuth2.getEmail())
+//                .map(existingMember -> updateExistingMember(existingMember, reqOAuth2))
+//                .orElseGet(() -> createNewOAuth2Member(reqOAuth2));
+//    }
+//
+//    private Member updateExistingMember(Member existingMember, ReqOAuth2 reqOAuth2) {
+//        existingMember.updateOAuth2Info(reqOAuth2.getProvider(), reqOAuth2.getProviderId());
+//        return memberRepository.save(existingMember);
+//    }
+//
+//    private Member createNewOAuth2Member(ReqOAuth2 reqOAuth2) {
+//        return memberRepository.save(reqOAuth2.ofEntity(reqOAuth2));
+//    }
 
 
     //=================================================================================================================
@@ -195,9 +205,9 @@ public class MemberService {
 
 //    // 펫 정보 수정
 //    @Transactional
-//    public void updatePet(Long petId, String name, String breed, int age, double weight) {
+//    public void updatePet(Long petId, String name, String breed, int age) {
 //        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
-//        pet.updatePet(name, breed, age, weight);
+//        pet.updatePet(name, breed, age;
 //        petRepository.save(pet);
 //    }
 //

@@ -3,12 +3,11 @@ package com.project.reservation.entity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
 @Entity
-
+@Getter
+@NoArgsConstructor
 public class Pet {
 
     @Id @GeneratedValue
@@ -24,9 +23,6 @@ public class Pet {
     @Column(nullable = false)
     private int age;
 
-    @Column(nullable = false)
-    private double weight;
-
     //======================================================================================
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
@@ -34,23 +30,19 @@ public class Pet {
 
     //======================================================================================
     @Builder
-    public Pet( Long id, String name, String breed, int age, double weight, Member member) {
+    public Pet( Long id, String name, String breed, int age, Member member) {
         this.id = id;
         this.name = name;
         this.breed = breed;
         this.age = age;
-        this.weight = weight;
         this.member = member;
     }
 
     //======================================================================================
     //동물정보 수정
-    public void updatePet(String name, String breed, int age, double weight) {
+    public void updatePet(String name, String breed, int age) {
         this.name = name;
         this.breed = breed;
         this.age = age;
-        this.weight = weight;
     }
-
-
 }

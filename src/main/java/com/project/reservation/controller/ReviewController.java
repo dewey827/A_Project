@@ -41,9 +41,9 @@ public class ReviewController {
     @GetMapping("/search")
     public ResponseEntity<Page<ResReviewList>> search(
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestParam String title,
-            @RequestParam String content,
-            @RequestParam String writerName) {
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "writerName", required = false) String writerName) {
         SearchDto searchDto = SearchDto.searchData(title, content, writerName);
         Page<ResReviewList> searchReview = reviewService.search(searchDto, pageable);
         return  ResponseEntity.status(HttpStatus.OK).body(searchReview);
@@ -66,7 +66,6 @@ public class ReviewController {
             @AuthenticationPrincipal Member member
     ) {
         ResReviewWrite saveReviewDTO = reviewService.createReview(reqReviewWrite, member);
-        log.info("롤 정보" + member.getAuthorities());
         return ResponseEntity.status(HttpStatus.CREATED).body(saveReviewDTO);
     }
 
@@ -75,9 +74,7 @@ public class ReviewController {
     public ResponseEntity<ResReviewDetail> update(
             @PathVariable("reviewId") Long reviewId,
             @RequestBody ReqReviewUpdate reqReviewUpdate) {
-        log.info("00");
         ResReviewDetail updateReviewDTO = reviewService.updateReview(reviewId, reqReviewUpdate);
-        log.info("01");
         return ResponseEntity.status(HttpStatus.OK).body(updateReviewDTO);
     }
     
@@ -89,12 +86,12 @@ public class ReviewController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // GET - 리뷰에 포함된 총 좋아요 개수 반환 API
-    @GetMapping("/{reviewId}/likes")
-    public ResponseEntity<Integer> getLikes(
-            @PathVariable("reviewId")
-            @Param("reviewId") Long reviewId) {
-        int likes = reviewService.getLikes(reviewId);
-        return ResponseEntity.status(HttpStatus.OK).body(likes);
-    }
+//    // GET - 리뷰에 포함된 총 좋아요 개수 반환 API - 불필요
+//    @GetMapping("/{reviewId}/likes")
+//    public ResponseEntity<Integer> getLikes(
+//            @PathVariable("reviewId")
+//            @Param("reviewId") Long reviewId) {
+//        int likes = reviewService.getLikes(reviewId);
+//        return ResponseEntity.status(HttpStatus.OK).body(likes);
+//    }
 }

@@ -32,4 +32,6 @@ public class ReqMemberUpdate {
         this.phone = phone;
         this.pets = pets;
     }
+
+
 }

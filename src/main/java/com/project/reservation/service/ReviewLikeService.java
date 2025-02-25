@@ -62,16 +62,16 @@ public class ReviewLikeService {
 
         boolean hasLiked = reviewLikeRepository.existsByReviewAndMember(review, member);
 
-//        return ResReviewDetail.fromEntity(review, hasLiked);
         //특정 사용자가 특정 리뷰를 좋아요했는지 여부 반환
         return reviewLikeRepository.existsByReviewAndMember(review, member);
+//        return ResReviewDetail.fromEntity(review, hasLiked);
     }
 
-    //총 좋아요 수
-    public int countLike(Long reviewId) {
-        //리뷰 ID로 조회, 없으면 예외
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-        return review.getLikes();
-    }
+//    //총 좋아요 수 - 불필요
+//    public int countLike(Long reviewId) {
+//        //리뷰 ID로 조회, 없으면 예외
+//        Review review = reviewRepository.findById(reviewId)
+//                .orElseThrow(() -> new RuntimeException("Review not found"));
+//        return review.getLikes();
+//    }
 }

@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/reservation/nonmember")
 @RequiredArgsConstructor
+@RequestMapping("/api/nonMember")
 public class NonMemberController {
     private final NonMemberService nonMemberService;
 
-    @PostMapping
+    @PostMapping("/post")
     public ResponseEntity<?> createNonMember(@RequestBody ReqNonMember reqNonMember) {
 
         try {
@@ -28,7 +28,7 @@ public class NonMemberController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/get")
     public ResponseEntity<List<ResNonMember>> getAllNonMembers() {
         List<NonMember> nonMembers = nonMemberService.getAllNonMembers();
         List<ResNonMember> responses = nonMembers.stream()

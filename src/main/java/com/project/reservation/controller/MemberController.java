@@ -7,6 +7,7 @@ import com.project.reservation.dto.request.member.ReqMemberLogin;
 import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
+import com.project.reservation.entity.Member;
 import com.project.reservation.service.MailService;
 import com.project.reservation.service.MemberService;
 
@@ -59,10 +60,11 @@ public class MemberController {
         // 서비스레이어에서 요청 DTO 로 로그인 메소드를 한 결과를 ResMemberToken 로 받음. 성공시 생성된 토큰 정보
         ResMemberToken resMemberToken = memberService.login(reqMemberLogin);
         return  ResponseEntity.status(HttpStatus.OK).header(resMemberToken.getToken()).body(resMemberToken);
-//        return ResponseEntity.ok()
-//                .header("Authorization", "Bearer " + resMemberToken.getToken())
-//                .body(resMemberToken);
     }
+    //====================================================================================================
+    // 수정
+
+    // 삭제
 
     //====================================================================================================
     // 이메일 찾기
@@ -73,7 +75,7 @@ public class MemberController {
 
         return ResponseEntity.ok("귀하의 이메일 입니다. : " + memberEmail);
     }
-
+    // 비밀번호 찾기
     @PostMapping("/findPw")
     public ResponseEntity<?> findPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
 
@@ -86,6 +88,7 @@ public class MemberController {
             return ResponseEntity.badRequest().body("등록되지 않은 이메일입니다.");
         }
     }
+
     @PostMapping("/findPw/verify")
     public ResponseEntity<?> verifyCode(@RequestBody ReqMemberFindPw reqMemberFindPw) {
 
@@ -93,37 +96,28 @@ public class MemberController {
 
             return ResponseEntity.ok("인증 코드가 확인되었습니다.");
         } else {
-            return ResponseEntity.badRequest().body("잘못된 인증 코드입니다.");
+            return ResponseEntity.badRequest().body("잘못된 인증 코드 혹은 만료된 인증 코드입니다.");
         }
     }
 
-    @PostMapping("/findPw/checkPassword")
-    public ResponseEntity<?> checkPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
-        try {
-            memberService.checkPassword(reqMemberFindPw.getNewPassword(), reqMemberFindPw.getNewPasswordCheck());
-            return ResponseEntity.ok("비밀번호가 일치합니다.");
-        } catch (MemberException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
+//    @PostMapping("/findPw/checkPassword") - 프론트에서
+//    public ResponseEntity<?> checkPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
+//        try {
+//            memberService.checkPassword(reqMemberFindPw.getNewPassword(), reqMemberFindPw.getNewPasswordCheck());
+//            return ResponseEntity.ok("비밀번호가 일치합니다.");
+//        } catch (MemberException e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 
     @PostMapping("/findPw/resetPw")
     public ResponseEntity<?> resetPassword(@RequestBody ReqMemberFindPw reqMemberFindPw) {
-        if (mailService.verifyCode(reqMemberFindPw.getEmail(), reqMemberFindPw.getCode())) {
-            try {
-                memberService.checkPassword(reqMemberFindPw.getNewPassword(), reqMemberFindPw.getNewPasswordCheck());
-                return ResponseEntity.ok("비밀번호가 성공적으로 재설정되었습니다.");
-            } catch (MemberException e) {
-                return ResponseEntity.badRequest().build();
-            }
-        } else {
-            return ResponseEntity.badRequest().body("인증 실패 또는 만료된 코드입니다.");
-        }
+        ResMember resMember = memberService.resetMemberPassword(reqMemberFindPw);
+        return ResponseEntity.ok().body("비밀번호가 성공적으로 재설정되었습니다.");
     }
+    //====================================================================================================
 
 
-    /** 수정 삭제 등 추후에 **/
 
 
 }

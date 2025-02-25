@@ -21,17 +21,17 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 제목 검색
     @Query(value = "SELECT r FROM Review r JOIN FETCH r.member WHERE r.title LIKE %:title%")
-    Page<Review> findAllTitleContaining(String title, Pageable pageable);
+    Page<Review> findAllTitleContaining(@Param("title") String title, Pageable pageable);
 
     // 내용 검색
     @Query(value = "SELECT r FROM Review r JOIN FETCH r.member WHERE r.content LIKE %:content%")
-    Page<Review> findAllContentContaining(String content, Pageable pageable);
+    Page<Review> findAllContentContaining(@Param("content") String content, Pageable pageable);
 
     // 작성자 검색
     @Query(value = "SELECT r FROM Review r JOIN FETCH r.member WHERE r.member.nickName LIKE %:nickName%")
-    Page<Review> findAllNicknameContaining(String nickName, Pageable pageable);
+    Page<Review> findAllNicknameContaining(@Param("nickName") String nickName, Pageable pageable);
 
-    // 리뷰의 총 좋아요 수 조회
-    @Query(value = "SELECT COUNT(l) FROM ReviewLike l WHERE l.review.id = :reviewId")
-    int countLikesByReview(Long reviewId);
+//    // 리뷰의 총 좋아요 수 조회 - 불필요
+//    @Query(value = "SELECT COUNT(l) FROM ReviewLike l WHERE l.review.id = :reviewId")
+//    int countLikesByReview(Long reviewId);
 }

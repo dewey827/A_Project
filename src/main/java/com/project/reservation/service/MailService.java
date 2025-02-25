@@ -104,7 +104,6 @@ public class MailService {
                 return true;
             }
         }
-        log.info("메일 검증 실패");
         return false;
     }
 
@@ -125,8 +124,6 @@ public class MailService {
         verificationCodes.remove(receiver);
         // (동시성 맵 2) 에서 receiver 를 키값으로 가진 데이터 삭제
         expirationTimes.remove(receiver);
-
-        log.info("메일 검증 실패");
         return false;
     }
 

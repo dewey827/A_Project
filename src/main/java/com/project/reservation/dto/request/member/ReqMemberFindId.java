@@ -11,14 +11,10 @@ import lombok.Setter;
 public class ReqMemberFindId {
     private String name;
     private String phone;
-    private String email;
 
     @Builder
-    public ReqMemberFindId(String name, String phone, String email){
+    public ReqMemberFindId(String name, String phone){
         this.name = name;
         this.phone = phone;
-        this.email = email;
     }
-
-
 }

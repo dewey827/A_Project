@@ -1,54 +1,60 @@
 package com.project.reservation.service;
 
+import com.project.reservation.dto.request.pet.ReqPet;
+import com.project.reservation.dto.response.pet.ResPet;
 import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Pet;
 import com.project.reservation.repository.MemberRepository;
 import com.project.reservation.repository.PetRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PetService {
 
-    @Autowired
-    private PetRepository petRepository;
+    private final PetRepository petRepository;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
 
-    // 모든 펫 조회
-    public List<Pet> findAllPets() {
-        return petRepository.findAll();
+    public ResPet addPet(Long memberId, ReqPet reqPet) {
+        Member member = memberRepository.findById(memberId)
+
+
+        Pet pet = Pet.builder()
+                .name(reqPet.getName())
+                .breed(reqPet.getBreed())
+                .age(reqPet.getAge())
+                .member(member)
+                .build();
+
+        Pet savedPet = petRepository.save(pet);
+        return ResPet.fromEntity(savedPet);
     }
 
-    // ID로 펫 조회
-    public Pet findPetById(Long petId) {
-        return petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+    public List<ResPet> getPetsByMemberId(Long memberId) {
+        List<Pet> pets = petRepository.findByMemberId(memberId);
+        return pets.stream()
+                .map(ResPet::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    // 회원에게 펫 추가
-    @Transactional
-    public void addPetToMember(Long memberId, Pet pet) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Member not found"));
-        pet.setMember(member);
-        petRepository.save(pet);
+    public ResPet updatePet(Long petId, ReqPet reqPet) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new RuntimeException("Pet not found"));
+
+        pet.updatePet(reqPet.getName(), reqPet.getBreed(), reqPet.getAge());
+        Pet updatedPet = petRepository.save(pet);
+        return ResPet.fromEntity(updatedPet);
     }
 
-    // 펫 정보 수정
-    @Transactional
-    public void updatePet(Long petId, String name, String breed, int age, double weight) {
-        Pet pet = findPetById(petId);
-        pet.updatePet(name, breed, age, weight);
-        petRepository.save(pet);
-    }
 
-    // 회원에게서 펫 제거
-    @Transactional
-    public void removePet(Long petId) {
-        Pet pet = findPetById(petId);
-        pet.setMember(null);
-        petRepository.delete(pet);
+    // 펫 삭제
+    public void deletePet(Long petId) {
+        petRepository.deleteById(petId);
     }
 }

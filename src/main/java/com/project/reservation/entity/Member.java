@@ -106,8 +106,6 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.pets.remove(pet);
     }
 
-
-
     public Member update(String name) {
         this.name = name;
         return this;

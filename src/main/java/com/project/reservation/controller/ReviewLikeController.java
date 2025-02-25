@@ -25,18 +25,25 @@ public class ReviewLikeController {
     }
 
     // Get - 사용자가 특정 리뷰에 좋아요를 눌렀는지 여부 반환
+//    @GetMapping("/status")
+//    public ResponseEntity<Boolean> hasLiked(
+//            @PathVariable("reviewId") Long reviewId,
+//            @RequestParam("memberId") Long memberId) {
+//        boolean hasLiked = reviewLikeService.hasLiked(reviewId, memberId);
+//        return ResponseEntity.ok(hasLiked);
+//    }
+
     @GetMapping("/status")
-    public ResponseEntity<Boolean> hasLiked(
-            @PathVariable("reviewId") Long reviewId,
-            @RequestParam("memberId") Long memberId) {
-        boolean hasLiked = reviewLikeService.hasLiked(reviewId, memberId);
+    public ResponseEntity<Boolean> hasLiked(@RequestBody ReqReviewLike reqReviewLike) {
+        boolean hasLiked = reviewLikeService.hasLiked(reqReviewLike.getReviewId(), reqReviewLike.getMemberId());
         return ResponseEntity.ok(hasLiked);
     }
 
-    // GET - 총 좋아요 수 정수로 반환
-    @GetMapping("/countLikes")
-    public ResponseEntity<Integer> getLikesCount(@PathVariable("reviewId") Long reviewId) {
-        int likesCount = reviewLikeService.countLike(reviewId);
-        return ResponseEntity.ok(likesCount);
-    }
+
+//    // GET - 총 좋아요 수 정수로 반환 - 불필요
+//    @GetMapping("/countLikes")
+//    public ResponseEntity<Integer> getLikesCount(@PathVariable("reviewId") Long reviewId) {
+//        int likesCount = reviewLikeService.countLike(reviewId);
+//        return ResponseEntity.ok(likesCount);
+//    }
 }
