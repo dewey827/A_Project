@@ -61,7 +61,7 @@ public class SecurityConfig {
                                 "login/**",
 
                                 "/reservation/nonmember/**",
-                                "/review/**",
+                                "/review/list",
                                 "/question/list",
                                 "/notice/list",
                                 "/notice/{noticeId}",
@@ -69,7 +69,7 @@ public class SecurityConfig {
                                 "/notice/{noticeId}/file/download/**"
                         ).permitAll()      // 추가 필요
 
-                        .requestMatchers("/api/member/**").hasRole("USER")      // 추가 필요
+                        .requestMatchers("/api/member/**","/review/write").hasRole("USER")      // 추가 필요
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

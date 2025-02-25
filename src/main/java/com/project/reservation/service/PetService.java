@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,27 +22,31 @@ public class PetService {
     private final MemberRepository memberRepository;
 
 
-    public ResPet addPet(Long memberId, ReqPet reqPet) {
+    public List<ResPet> getPets(Long memberId) {
         Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
-
-        Pet pet = Pet.builder()
-                .name(reqPet.getName())
-                .breed(reqPet.getBreed())
-                .age(reqPet.getAge())
-                .member(member)
-                .build();
-
-        Pet savedPet = petRepository.save(pet);
-        return ResPet.fromEntity(savedPet);
-    }
-
-    public List<ResPet> getPetsByMemberId(Long memberId) {
-        List<Pet> pets = petRepository.findByMemberId(memberId);
-        return pets.stream()
+        return member.getPets().stream()
                 .map(ResPet::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    public List<ResPet> addPets(Long memberId, List<ReqPet> reqPets) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        List<Pet> savedPets = new ArrayList<>();
+        for (ReqPet reqPet : reqPets) {
+            Pet pet = ReqPet.ofEntity(reqPet, member);
+            member.addPet(pet);
+            savedPets.add(petRepository.save(pet));
+        }
+
+        return savedPets.stream()
+                .map(ResPet::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
     public ResPet updatePet(Long petId, ReqPet reqPet) {
         Pet pet = petRepository.findById(petId)

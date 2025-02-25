@@ -39,6 +39,12 @@ public class Pet {
     }
 
     //======================================================================================
+    // 연관관계 메소드
+    public void setMember(Member member) {
+        this.member = member;
+        member.getPets().add(this);
+    }
+
     //동물정보 수정
     public void updatePet(String name, String breed, int age) {
         this.name = name;

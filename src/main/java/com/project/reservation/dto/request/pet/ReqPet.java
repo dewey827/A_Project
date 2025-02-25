@@ -1,5 +1,7 @@
 package com.project.reservation.dto.request.pet;
 
+import com.project.reservation.entity.Member;
+import com.project.reservation.entity.Pet;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,5 +22,14 @@ public class ReqPet {
         this.name = name;
         this.breed = breed;
         this.age = age;
+    }
+
+    public static Pet ofEntity(ReqPet reqPet, Member member) {
+        return Pet.builder()
+                .name(reqPet.getName())
+                .breed(reqPet.getBreed())
+                .age(reqPet.getAge())
+                .member(member)
+                .build();
     }
 }
