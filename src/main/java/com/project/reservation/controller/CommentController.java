@@ -47,17 +47,20 @@ public class CommentController {
     @PutMapping("/{commentId}/update")
     public ResponseEntity<ResComment> update(
             @PathVariable("commentId") Long commentId,
-            @RequestBody ReqComment reqComment) {
+            @RequestBody ReqComment reqComment,
+            @AuthenticationPrincipal Member member) {
 
-        ResComment updateCommentDTO = commentService.updateComment(commentId, reqComment);
-        return ResponseEntity.status(HttpStatus.OK).body(updateCommentDTO);
+        ResComment resComment = commentService.updateComment(commentId, reqComment, member);
+        return ResponseEntity.status(HttpStatus.OK).body(resComment);
     }
 
     // 댓글 삭제
     @DeleteMapping("/{commentId}/delete")
-    public ResponseEntity<Long> delete(@PathVariable("commentId") Long commentId) {
+    public ResponseEntity<Long> delete(
+            @PathVariable("commentId") Long commentId,
+            @AuthenticationPrincipal Member member) {
 
-        commentService.deleteComment(commentId);
+        commentService.deleteComment(commentId, member);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

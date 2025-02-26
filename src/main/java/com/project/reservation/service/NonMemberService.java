@@ -4,7 +4,6 @@ import com.project.reservation.dto.request.nonMember.ReqNonMember;
 import com.project.reservation.entity.NonMember;
 import com.project.reservation.repository.NonMemberRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

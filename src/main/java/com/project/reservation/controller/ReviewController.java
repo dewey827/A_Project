@@ -74,8 +74,8 @@ public class ReviewController {
             @PathVariable("reviewId") Long reviewId,
             @RequestBody ReqReviewUpdate reqReviewUpdate,
             @AuthenticationPrincipal Member member) {
-        ResReviewDetail updateReviewDTO = reviewService.updateReview(reviewId, reqReviewUpdate, member);
-        return ResponseEntity.status(HttpStatus.OK).body(updateReviewDTO);
+        ResReviewDetail resReviewDetail = reviewService.updateReview(reviewId, reqReviewUpdate, member);
+        return ResponseEntity.status(HttpStatus.OK).body(resReviewDetail);
     }
     
     // 리뷰 삭제

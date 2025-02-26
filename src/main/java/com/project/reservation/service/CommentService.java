@@ -1,6 +1,7 @@
 package com.project.reservation.service;
 
 import com.project.reservation.common.exception.ResourceNotFoundException;
+import com.project.reservation.common.exception.ReviewException;
 import com.project.reservation.dto.request.comment.ReqComment;
 import com.project.reservation.dto.response.comment.ResComment;
 import com.project.reservation.entity.Comment;
@@ -15,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,19 +64,31 @@ public class CommentService {
         return ResComment.fromEntity(saveComment);
     }
 
-    //댓글 수정
-    public ResComment updateComment(Long commentId, ReqComment reqComment) {
-        // 댓글 ID로 댓글 엔티티 조회 (작성자와 게시판 정보도 함께 가져옴, 없으면 예외 발생)
-        Comment comment = commentRepository.findByIdWithMemberAndReview(commentId).orElseThrow(
-                () -> new ResourceNotFoundException("Comment", "Comment Id", String.valueOf(commentId)));
-        // 요청받은 내용으로 댓글 내용을 업데이트 (엔티티 내부 메서드 호출)
+    // 댓글 수정
+    public ResComment updateComment(@Param("commentId") Long commentId, ReqComment reqComment, Member currentMember) {
+        Comment comment = commentRepository.findByIdWithMemberAndReview(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment", "Comment Id", String.valueOf(commentId))
+                );
+
+        // 현재 사용자가 댓글 작성자인지 확인
+        if (!comment.getMember().getId().equals(currentMember.getId())) {
+            throw new ReviewException("댓글 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
         comment.update(reqComment.getContent());
-        // 업데이트된 Comment 엔티티를 ResComment DTO로 변환하여 반환
-        return ResComment.fromEntity(comment);
+        Comment newComment = commentRepository.save(comment);
+        return ResComment.fromEntity(newComment);
     }
 
-    //댓글 삭제
-    public void deleteComment(Long commentId) {
+    // 댓글 삭제
+    public void deleteComment(@Param("commentId")Long commentId, Member currentMember) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(
+                () -> new ResourceNotFoundException("Comment", "Comment Id", String.valueOf(commentId)));
+
+        // 현재 사용자가 댓글 작성자인지 확인
+        if (!comment.getMember().getId().equals(currentMember.getId())) {
+            throw new ReviewException("댓글 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
         commentRepository.deleteById(commentId);
     }
 }
