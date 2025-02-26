@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+
 public class Pet {
 
     @Id @GeneratedValue
@@ -27,7 +28,6 @@ public class Pet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
     public Member member;
-
     //======================================================================================
     @Builder
     public Pet( Long id, String name, String breed, int age, Member member) {
@@ -37,7 +37,6 @@ public class Pet {
         this.age = age;
         this.member = member;
     }
-
     //======================================================================================
     // 연관관계 메소드
     public void setMember(Member member) {

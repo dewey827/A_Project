@@ -106,11 +106,6 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.pets.remove(pet);
     }
 
-    public Member update(String name) {
-        this.name = name;
-        return this;
-    }
-
     //======================================================================================
     // implements Userdetails - 스프링 시큐리티 overrider 메소드
     // 추후에 role 들이 추가될 수 있으므로 ArrayList<>() 로 관리

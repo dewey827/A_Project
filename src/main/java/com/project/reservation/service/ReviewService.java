@@ -1,7 +1,9 @@
 package com.project.reservation.service;
 
 import com.project.reservation.common.SearchDto;
+import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.common.exception.ResourceNotFoundException;
+import com.project.reservation.common.exception.ReviewException;
 import com.project.reservation.dto.request.review.ReqReviewUpdate;
 import com.project.reservation.dto.request.review.ReqReviewWrite;
 import com.project.reservation.dto.response.review.ResReviewDetail;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -94,21 +97,36 @@ public class ReviewService {
     }
 
     // 리뷰 수정
-    public ResReviewDetail updateReview(@Param("reviewId") Long reviewId, ReqReviewUpdate reqReviewUpdate) {
+    public ResReviewDetail updateReview(@Param("reviewId") Long reviewId, ReqReviewUpdate reqReviewUpdate, Member currentMember) {
         // 리뷰 ID로 기존 리뷰 조회
-        Review newReview = reviewRepository.findByIdWithMemberAndComments(reviewId)
+        Review review = reviewRepository.findByIdWithMemberAndComments(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "Review Id", String.valueOf(reviewId))
                 );
+
+        // 현재 로그인한 사용자와 리뷰 작성자 비교
+        if (!review.getMember().getId().equals(currentMember.getId())) {
+            throw new ReviewException("후기 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
         // 리뷰 내용 수정
-        newReview.update(reqReviewUpdate.getTitle(), reqReviewUpdate.getContent());
+        review.update(reqReviewUpdate.getTitle(), reqReviewUpdate.getContent());
         // 수정된 리뷰 저장
-        Review savedReview = reviewRepository.save(newReview);
+        Review savedReview = reviewRepository.save(review);
         // 수정된 리뷰 데이터 반환
         return ResReviewDetail.fromEntity(savedReview);
     }
 
     // 리뷰 삭제
-    public void deleteReview(Long reviewId) {
+    @Transactional
+    public void deleteReview(Long reviewId, Member currentMember) {
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "Review Id", String.valueOf(reviewId)));
+
+        // 현재 로그인한 사용자와 리뷰 작성자 비교
+        if (!review.getMember().getId().equals(currentMember.getId())) {
+            throw new ReviewException("후기 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
         reviewRepository.deleteById(reviewId);
     }
 

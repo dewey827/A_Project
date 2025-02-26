@@ -73,16 +73,18 @@ public class ReviewController {
     @PatchMapping("/{reviewId}/update")
     public ResponseEntity<ResReviewDetail> update(
             @PathVariable("reviewId") Long reviewId,
-            @RequestBody ReqReviewUpdate reqReviewUpdate) {
-        ResReviewDetail updateReviewDTO = reviewService.updateReview(reviewId, reqReviewUpdate);
+            @RequestBody ReqReviewUpdate reqReviewUpdate,
+            @AuthenticationPrincipal Member member) {
+        ResReviewDetail updateReviewDTO = reviewService.updateReview(reviewId, reqReviewUpdate, member);
         return ResponseEntity.status(HttpStatus.OK).body(updateReviewDTO);
     }
     
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}/delete")
     public ResponseEntity<Long> delete(
-            @PathVariable("reviewId") Long reviewId) {
-        reviewService.deleteReview(reviewId);
+            @PathVariable("reviewId") Long reviewId,
+            @AuthenticationPrincipal Member member) {
+        reviewService.deleteReview(reviewId, member);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

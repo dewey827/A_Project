@@ -12,13 +12,14 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class ReqPet {
-
+    private Long id;
     private String name;
     private String breed;
     private int age;
 
     @Builder
-    public ReqPet(String name, String breed, int age) {
+    public ReqPet(Long id, String name, String breed, int age) {
+        this.id = id;
         this.name = name;
         this.breed = breed;
         this.age = age;

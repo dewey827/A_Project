@@ -1,10 +1,7 @@
 package com.project.reservation.controller;
 
 import com.project.reservation.common.exception.MemberException;
-import com.project.reservation.dto.request.member.ReqMemberFindId;
-import com.project.reservation.dto.request.member.ReqMemberFindPw;
-import com.project.reservation.dto.request.member.ReqMemberLogin;
-import com.project.reservation.dto.request.member.ReqMemberRegister;
+import com.project.reservation.dto.request.member.*;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.Member;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -117,7 +115,11 @@ public class MemberController {
     }
     //====================================================================================================
 
-
-
-
+    @PostMapping("/myPage")
+    public ResponseEntity<ResMember> myPagePasswordCheck(
+            @AuthenticationPrincipal Member member,
+            @RequestBody ReqMemberMyPage reqMemberMyPage) {
+        ResMember resMember = memberService.myPageCheck(member, reqMemberMyPage.getPassword());
+        return ResponseEntity.ok(resMember);
+    }
 }

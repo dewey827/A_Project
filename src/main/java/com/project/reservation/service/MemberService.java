@@ -149,6 +149,9 @@ public class MemberService {
         return ResMember.fromEntity(currentMember);
     }
 
+
+
+
     // 수정
     public ResMember update(Member member, ReqMemberUpdate reqMemberUpdate) {
 //        // 업데이트 폼의 새 비밀번호와 비밀번호 확인이 일치하는지 확인
