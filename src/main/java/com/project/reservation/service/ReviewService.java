@@ -8,7 +8,6 @@ import com.project.reservation.dto.request.review.ReqReviewUpdate;
 import com.project.reservation.dto.request.review.ReqReviewWrite;
 import com.project.reservation.dto.response.review.ResReviewDetail;
 import com.project.reservation.dto.response.review.ResReviewList;
-import com.project.reservation.dto.response.review.ResReviewWrite;
 import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Review;
 import com.project.reservation.repository.MemberRepository;
@@ -68,11 +67,11 @@ public class ReviewService {
     }
 
     // 리뷰 등록
-    public ResReviewWrite createReview(ReqReviewWrite reqReviewWrite, Member member) {
+    public ResReviewDetail createReview(ReqReviewWrite reqReviewWrite, Member member) {
         // 요청 데이터를 Review 엔티티로 변환
         Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
         // 작성자 회원 정보 조회
-        Member writerMember = memberRepository.findByNickName(reqReviewWrite.getNickName()).orElseThrow(
+        Member writerMember = memberRepository.findById(member.getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
         // 리뷰에 작성자 매핑
@@ -81,7 +80,7 @@ public class ReviewService {
         // 리뷰 저장
         Review saveReview = reviewRepository.save(review);
         // 저장된 리뷰 데이터 반환
-        return ResReviewWrite.fromEntity(saveReview, writerMember.getNickName());
+        return ResReviewDetail.fromEntity(saveReview);
     }
 
     // 리뷰 상세보기

@@ -43,33 +43,9 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-
-
-    // 아이디 찾기
-    public String findEmail(String name, String phone) {
-        Member member = memberRepository.findByNameAndPhone(name, phone)
-                .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
-        return member.getEmail();
-    }
-
-    public boolean isEmailExist(String email) {
-        return memberRepository.findByEmail(email).isPresent();
-    }
-
-
-    @Transactional
-    public void resetPassword(String email, String newPassword) {
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new MemberException("회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND));
-
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        member.resetPassword(encodedPassword);
-    }
-
-
-    //=========================================================================================================
     // 인증상태를 관리하기 위한 동시성 맵. 키값은 수신자, 값은 true/false
     private final Map<String, Boolean> verificationStatus = new ConcurrentHashMap<>();
+
 
 //    // 비밀번호와 비밀번호 확인 같은지 체크 - 프론트에서
 //    public void checkPassword(String password, String passwordCheck) {
@@ -131,39 +107,37 @@ public class MemberService {
         UserDetails foundMember = customUserDetailsService.loadUserByUsername(reqMemberLogin.getEmail());
         // checkStoredPasswordInDB 메소드로 입력된 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
         checkStoredPasswordInDB(reqMemberLogin.getPassword(), foundMember.getPassword());
-        /** unifiedGenerateToken 로 바꾸는거 고려해보기 **/
+
+        String nickName = ((Member) foundMember).getNickName();
         // foundMember 로 토큰 생성
-        String token = jwtTokenUtil.generateToken(foundMember);
+        String token = jwtTokenUtil.generateToken(foundMember, nickName);
         // 클라이언트에게 응답으로 토큰 보냄
         return ResMemberToken.fromEntity(foundMember, token);
     }
 
-    // 마이페이지 - 비밀번호 확인
-    public ResMember myPageCheck(Member member, String typedPassword) {
-        // 현재 로그인한 멤버 (Member member) 의 정보를 조회, ResMember 로 사용하기 위해 UserDetails 타입을 Member 타입으로 캐스팅
-        Member currentMember = (Member) customUserDetailsService.loadUserByUsername(member.getEmail());
-        // checkStoredPasswordInDB 메소드로 사용자가 입력하는 비밀번호가 DB 의 사용자의 비밀번호와 일치하는지 확인
-        checkStoredPasswordInDB(typedPassword, currentMember.getPassword());
-        log.info("memberservice - myPageCheck 사용됨");
-        // 성공하면 조회된 사용자 정보를 DTO 로 변환하여 반환
-        return ResMember.fromEntity(currentMember);
-    }
-
-
-
-
     // 수정
     public ResMember update(Member member, ReqMemberUpdate reqMemberUpdate) {
-//        // 업데이트 폼의 새 비밀번호와 비밀번호 확인이 일치하는지 확인
-//        checkPassword(reqMemberUpdate.getPassword(), reqMemberUpdate.getPasswordCheck());
         // 새 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(reqMemberUpdate.getPassword());
 
         Member currentMember =  memberRepository.findByEmail(member.getEmail()).orElseThrow(
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
-        currentMember.updateMember(encodedPassword, reqMemberUpdate.getNickName(), reqMemberUpdate.getAddr(), reqMemberUpdate.getBirth(), reqMemberUpdate.getPhone());
+        currentMember.updateMember(encodedPassword, reqMemberUpdate.getNickName(), reqMemberUpdate.getAddr(), reqMemberUpdate.getPhone());
         return ResMember.fromEntity(currentMember);
+    }
+
+    //=========================================================================================================
+    // 아이디 찾기
+    public String findEmail(String name, String phone) {
+        Member member = memberRepository.findByNameAndPhone(name, phone)
+                .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+        return member.getEmail();
+    }
+
+    // 비밀번호 찾기
+    public boolean isEmailExist(String email) {
+        return memberRepository.findByEmail(email).isPresent();
     }
 
     // 비밀번호 찾기 - 비밀번호 재설정
@@ -177,10 +151,18 @@ public class MemberService {
 
         return ResMember.fromEntity(member);
     }
-
-
-
-
+    //=========================================================================================================
+    // 마이페이지 - 비밀번호 확인
+    public ResMember myPageCheck(Member member, String typedPassword) {
+        // 현재 로그인한 멤버 (Member member) 의 정보를 조회, ResMember 로 사용하기 위해 UserDetails 타입을 Member 타입으로 캐스팅
+        Member currentMember = (Member) customUserDetailsService.loadUserByUsername(member.getEmail());
+        // checkStoredPasswordInDB 메소드로 사용자가 입력하는 비밀번호가 DB 의 사용자의 비밀번호와 일치하는지 확인
+        checkStoredPasswordInDB(typedPassword, currentMember.getPassword());
+        log.info("memberservice - myPageCheck 사용됨");
+        // 성공하면 조회된 사용자 정보를 DTO 로 변환하여 반환
+        return ResMember.fromEntity(currentMember);
+    }
+    //=========================================================================================================
 //      Oauth2
 //    public Member createOrUpdateOAuth2Member(ReqOAuth2 reqOAuth2) {
 //        return memberRepository.findByEmail(reqOAuth2.getEmail())
@@ -196,33 +178,8 @@ public class MemberService {
 //    private Member createNewOAuth2Member(ReqOAuth2 reqOAuth2) {
 //        return memberRepository.save(reqOAuth2.ofEntity(reqOAuth2));
 //    }
-
-
-    //=================================================================================================================
-
-// 회원의 펫 정보 조회
-    public List<Pet> getPetsByMemberId(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Member not found"));
-        return member.getPets();
-    }
-
-//    // 펫 정보 수정
-//    @Transactional
-//    public void updatePet(Long petId, String name, String breed, int age) {
-//        Pet pet = petRepository.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
-//        pet.updatePet(name, breed, age;
-//        petRepository.save(pet);
-//    }
-//
-//    // 펫 정보 삭제
-//    @Transactional
-//    public void deletePet(Long petId) {
-//        petRepository.deleteById(petId);
-//    }
-
-    
-    // private 메소드들 =========================================================================
-    // 이메일 중복체크 - 리파지토리 조회 후 중복시 예외 처리
+    // private 메소드들 ==========================================================================================
+    // 이메일 중복체크
     private void isExistUserEmail(String email) {
         if (memberRepository.findByEmail(email).isPresent()) {
             throw new MemberException("이미 사용 중인 이메일입니다.", HttpStatus.BAD_REQUEST);
@@ -246,7 +203,6 @@ public class MemberService {
         }
     }
 
-
     // 사용자가 입력한 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
     private void checkStoredPasswordInDB(String typedPassword, String encodedPassword) {
         if (!passwordEncoder.matches(typedPassword, encodedPassword)) {
@@ -269,5 +225,4 @@ public class MemberService {
             throw new MemberException("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
         }
     }
-
 }

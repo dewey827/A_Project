@@ -5,7 +5,6 @@ import com.project.reservation.dto.request.review.ReqReviewUpdate;
 import com.project.reservation.dto.request.review.ReqReviewWrite;
 import com.project.reservation.dto.response.review.ResReviewDetail;
 import com.project.reservation.dto.response.review.ResReviewList;
-import com.project.reservation.dto.response.review.ResReviewWrite;
 import com.project.reservation.entity.Member;
 import com.project.reservation.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -61,11 +60,11 @@ public class ReviewController {
 
     // 리뷰 작성
     @PostMapping("/write")
-    public ResponseEntity<ResReviewWrite> write(
+    public ResponseEntity<ResReviewDetail> write(
             @RequestBody ReqReviewWrite reqReviewWrite,
             @AuthenticationPrincipal Member member
     ) {
-        ResReviewWrite saveReviewDTO = reviewService.createReview(reqReviewWrite, member);
+        ResReviewDetail saveReviewDTO = reviewService.createReview(reqReviewWrite, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveReviewDTO);
     }
 

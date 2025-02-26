@@ -61,6 +61,13 @@ public class MemberController {
     }
     //====================================================================================================
     // 수정
+    @PatchMapping("/{memberId}/update")
+    public ResponseEntity<ResMember> update(
+            @AuthenticationPrincipal Member member,
+            @RequestBody ReqMemberUpdate reqMemberUpdate){
+        ResMember updatedMember = memberService.update(member, reqMemberUpdate);
+        return ResponseEntity.ok(updatedMember);
+    }
 
     // 삭제
 
@@ -114,7 +121,7 @@ public class MemberController {
         return ResponseEntity.ok().body("비밀번호가 성공적으로 재설정되었습니다.");
     }
     //====================================================================================================
-
+    // 마이페이지 - 올바른 비밀번호 POST 시 로그인한 사용자 정보 반환
     @PostMapping("/myPage")
     public ResponseEntity<ResMember> myPagePasswordCheck(
             @AuthenticationPrincipal Member member,

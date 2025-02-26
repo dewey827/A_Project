@@ -37,7 +37,7 @@ public class JwtTokenUtil implements Serializable {
     // 최종적으로 claims 안에는 String 타입의 여러 키와 Object 타입의 여러 값이 쌍으로 매핑되어 들어갑니다. JSON 데이터 같은 것.
     // 예를 들어, claims에 사용자 역할을 추가하고 싶다면 다음과 같이 할 수 있습니다: claims.put("role", userDetails.getRole());
     // doGenerateToken 메소드로 실제 토큰 생성. 초기화된 claims 맵과 userDetails 객체에서 가져온 사용자 이름(이메일)을 매개변수로 전달.
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, String nickname) {
         Map<String, Object> claims = new HashMap<>();
         // 사용자의 권한(roles) 정보를 추출
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
@@ -47,6 +47,8 @@ public class JwtTokenUtil implements Serializable {
 
         // claims 에 roles 정보 추가
         claims.put("roles", roles);
+        // claims에 nickname 정보 추가
+        claims.put("nickname", nickname);
         return doGenerateToken(claims, userDetails.getUsername());
     }
 

@@ -18,20 +18,14 @@ public class ReqMemberUpdate {
     private String passwordCheck;
     private String nickName;
     private String addr;
-    private String birth;
     private String phone;
-    private List<ReqPet> pets;
 
     @Builder
-    public ReqMemberUpdate(String password, String passwordCheck, String nickName, String addr, String birth, String phone, List<ReqPet> pets) {
+    public ReqMemberUpdate(String password, String passwordCheck, String nickName, String addr, String phone) {
         this.password = password;
         this.passwordCheck = passwordCheck;
         this.nickName = nickName;
         this.addr = addr;
-        this.birth = birth;
         this.phone = phone;
-        this.pets = pets;
     }
-
-
 }
