@@ -139,7 +139,7 @@ public class MemberController {
     }
     //====================================================================================================
     // 마이페이지 - 올바른 비밀번호 POST 시 로그인한 사용자 정보 반환
-    @PostMapping("/myPage")
+    @GetMapping("/myPage")
     public ResponseEntity<ResMember> myPagePasswordCheck(
             @AuthenticationPrincipal Member member,
             @RequestBody ReqMemberMyPage reqMemberMyPage) {
