@@ -8,8 +8,10 @@ import com.project.reservation.dto.request.member.ReqMemberRegister;
 import com.project.reservation.dto.request.member.ReqMemberUpdate;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
+import com.project.reservation.entity.DeletedMember;
 import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Pet;
+import com.project.reservation.repository.DeletedMemberRepository;
 import com.project.reservation.repository.MemberRepository;
 import com.project.reservation.repository.PetRepository;
 import com.project.reservation.security.jwt.CustomUserDetailsService;
@@ -18,6 +20,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -27,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class MemberService {
 
+    private final DeletedMemberRepository deletedMemberRepository;
     private final MemberRepository memberRepository;
     private final PetRepository petRepository;
     private final CustomUserDetailsService customUserDetailsService;
@@ -127,6 +132,59 @@ public class MemberService {
         return ResMember.fromEntity(currentMember);
     }
 
+    // 삭제(DeletedMember 로 이동)
+
+    public void deleteMember(Long memberId, Member currentMember) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+
+        if(!member.getId().equals(currentMember.getId())) {
+            throw new MemberException("본인 계정만 탈퇴할 수 있습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        DeletedMember deletedMember = DeletedMember.builder()
+                .originalId(member.getId())
+                .name(member.getName())
+                .email(member.getEmail())
+                .password(member.getPassword())
+                .nickName(member.getNickName())
+                .addr(member.getAddr())
+                .birth(member.getBirth())
+                .phone(member.getPhone())
+                .deletedAt(LocalDateTime.now())
+                .build();
+
+        deletedMemberRepository.save(deletedMember);
+
+        // 연관 엔티티 처리
+
+        member.getPets().clear();
+        member.getReviews().clear();
+        member.getComments().clear();
+//        코드 합칠때 주석 풀어주세요
+//        member.getReservations().clear();
+//        member.getQuestions().clear();
+//        member.getAnswers().clear();
+
+        memberRepository.delete(member);
+    }
+
+    // 탈퇴 회원 조회
+    public DeletedMember getDeletedMemberInfo(Long originalId) {
+        return deletedMemberRepository.findByOriginalId(originalId)
+                .orElseThrow(() -> new MemberException("탈퇴한 회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+    }
+
+    // 탈퇴 회원 데이터 정리 (예: 6개월 이상 지난 데이터 삭제)
+    @Transactional
+    @Scheduled(cron = "0 0 1 * * ?") // 매일 새벽 1시에 실행
+    public void cleanupDeletedMembers() {
+        LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
+        deletedMemberRepository.deleteByDeletedAtBefore(sixMonthsAgo);
+    }
+    
+
+
     //=========================================================================================================
     // 아이디 찾기
     public String findEmail(String name, String phone) {
@@ -154,11 +212,13 @@ public class MemberService {
     //=========================================================================================================
     // 마이페이지 - 비밀번호 확인
     public ResMember myPageCheck(Member member, String typedPassword) {
+        log.info("memberservice - myPageCheck 0 사용됨");
         // 현재 로그인한 멤버 (Member member) 의 정보를 조회, ResMember 로 사용하기 위해 UserDetails 타입을 Member 타입으로 캐스팅
         Member currentMember = (Member) customUserDetailsService.loadUserByUsername(member.getEmail());
+        log.info("memberservice - myPageCheck 1 사용됨");
         // checkStoredPasswordInDB 메소드로 사용자가 입력하는 비밀번호가 DB 의 사용자의 비밀번호와 일치하는지 확인
         checkStoredPasswordInDB(typedPassword, currentMember.getPassword());
-        log.info("memberservice - myPageCheck 사용됨");
+        log.info("memberservice - myPageCheck 2 사용됨");
         // 성공하면 조회된 사용자 정보를 DTO 로 변환하여 반환
         return ResMember.fromEntity(currentMember);
     }

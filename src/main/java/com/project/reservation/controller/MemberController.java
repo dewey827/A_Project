@@ -8,6 +8,7 @@ import com.project.reservation.entity.Member;
 import com.project.reservation.service.MailService;
 import com.project.reservation.service.MemberService;
 
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -70,6 +71,14 @@ public class MemberController {
     }
 
     // 삭제
+    @DeleteMapping("/{memberId}/delete")
+    public ResponseEntity<Long> delete(
+            @PathVariable("memberId") Long memberId,
+            @AuthenticationPrincipal Member member) {
+        memberService.deleteMember(memberId, member);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 
     //====================================================================================================
     // 이메일 찾기
@@ -126,7 +135,9 @@ public class MemberController {
     public ResponseEntity<ResMember> myPagePasswordCheck(
             @AuthenticationPrincipal Member member,
             @RequestBody ReqMemberMyPage reqMemberMyPage) {
+        log.info("memcon - myPageCheck 사용됨1");
         ResMember resMember = memberService.myPageCheck(member, reqMemberMyPage.getPassword());
+
         return ResponseEntity.ok(resMember);
     }
 }
