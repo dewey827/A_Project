@@ -75,7 +75,7 @@ public class ReviewService {
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
         // 리뷰에 작성자 매핑
-        review.setMappingMember(writerMember);
+        review.setMember(writerMember);
 
         // 리뷰 저장
         Review saveReview = reviewRepository.save(review);

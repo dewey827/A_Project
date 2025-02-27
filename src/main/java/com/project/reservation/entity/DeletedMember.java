@@ -46,7 +46,8 @@ public class DeletedMember extends BaseTimeEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public DeletedMember(Long id, Long originalId, String name, String email, String password, String nickName, String addr, String birth, String phone, LocalDateTime deletedAt) {
+    public DeletedMember(Long id, Long originalId, String name, String email, String password,
+                         String nickName, String addr, String birth, String phone, LocalDateTime deletedAt) {
         this.id = id;
         this.originalId = originalId;
         this.name = name;

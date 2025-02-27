@@ -1,6 +1,6 @@
 package com.project.reservation.controller;
 
-import com.project.reservation.common.exception.MemberException;
+import com.project.reservation.entity.DeletedMember;
 import com.project.reservation.dto.request.member.*;
 import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
@@ -8,13 +8,14 @@ import com.project.reservation.entity.Member;
 import com.project.reservation.service.MailService;
 import com.project.reservation.service.MemberService;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -79,6 +80,13 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    // !! 관리자용 !!
+    @GetMapping("/deletedMember")
+    public ResponseEntity<List<DeletedMember>> getAllDeletedMembers() {
+
+        List<DeletedMember> deletedMembers = memberService.getAllDeletedMember();
+        return new ResponseEntity<>(deletedMembers, HttpStatus.OK);
+    }
 
     //====================================================================================================
     // 이메일 찾기

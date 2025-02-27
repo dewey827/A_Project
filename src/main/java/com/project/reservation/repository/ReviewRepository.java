@@ -1,5 +1,6 @@
 package com.project.reservation.repository;
 
+import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
+    void deleteByMember(Member member);
     // 게시글 상세 조회
     @Query(value = "SELECT r FROM Review r JOIN FETCH r.member WHERE r.id = :reviewId")
     Optional<Review> findByIdWithMemberAndComments(@Param("reviewId") Long reviewID);

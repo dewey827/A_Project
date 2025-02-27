@@ -57,7 +57,7 @@ public class Review extends BaseTimeEntity {
 
     //=================================================================================
     //Review - Member 양방향 연관관계 매핑
-    public void setMappingMember(Member member) {
+    public void setMember(Member member) {
         this.member = member;
         member.getReviews().add(this);
     }

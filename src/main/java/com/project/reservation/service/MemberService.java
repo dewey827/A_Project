@@ -11,9 +11,7 @@ import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.DeletedMember;
 import com.project.reservation.entity.Member;
 import com.project.reservation.entity.Pet;
-import com.project.reservation.repository.DeletedMemberRepository;
-import com.project.reservation.repository.MemberRepository;
-import com.project.reservation.repository.PetRepository;
+import com.project.reservation.repository.*;
 import com.project.reservation.security.jwt.CustomUserDetailsService;
 import com.project.reservation.security.jwt.JwtTokenUtil;
 import jakarta.transaction.Transactional;
@@ -41,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class MemberService {
 
+    private final ReviewRepository reviewRepository;
+    private final CommentRepository commentRepository;
     private final DeletedMemberRepository deletedMemberRepository;
     private final MemberRepository memberRepository;
     private final PetRepository petRepository;
@@ -133,12 +133,12 @@ public class MemberService {
     }
 
     // 삭제(DeletedMember 로 이동)
-
+    @Transactional
     public void deleteMember(Long memberId, Member currentMember) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
-        if(!member.getId().equals(currentMember.getId())) {
+        if (!member.getId().equals(currentMember.getId())) {
             throw new MemberException("본인 계정만 탈퇴할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
 
@@ -157,30 +157,28 @@ public class MemberService {
         deletedMemberRepository.save(deletedMember);
 
         // 연관 엔티티 처리
-
-        member.getPets().clear();
-        member.getReviews().clear();
-        member.getComments().clear();
-//        코드 합칠때 주석 풀어주세요
-//        member.getReservations().clear();
-//        member.getQuestions().clear();
-//        member.getAnswers().clear();
+        reviewRepository.deleteByMember(member);
+        commentRepository.deleteByMember(member);
+        // 다른 리파지토리도 똑같이
 
         memberRepository.delete(member);
     }
 
     // 탈퇴 회원 조회
-    public DeletedMember getDeletedMemberInfo(Long originalId) {
-        return deletedMemberRepository.findByOriginalId(originalId)
-                .orElseThrow(() -> new MemberException("탈퇴한 회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
+    public List<DeletedMember> getAllDeletedMember() {
+        List<DeletedMember> deletedMembers = deletedMemberRepository.findAll();
+        if (deletedMembers.isEmpty()) {
+            throw new MemberException("보관중인 탈퇴 회원이 없습니다.", HttpStatus.BAD_REQUEST);
+        }
+        return deletedMembers;
     }
 
-    // 탈퇴 회원 데이터 정리 (예: 6개월 이상 지난 데이터 삭제)
+    // 탈퇴 회원 데이터 정리 (6개월이 지난 데이터 삭제)
     @Transactional
-    @Scheduled(cron = "0 0 1 * * ?") // 매일 새벽 1시에 실행
-    public void cleanupDeletedMembers() {
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에
+    public void hardDelete() {
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
-        deletedMemberRepository.deleteByDeletedAtBefore(sixMonthsAgo);
+        deletedMemberRepository.deleteByDeletedAtBefore (sixMonthsAgo);
     }
     
 
