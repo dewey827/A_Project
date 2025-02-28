@@ -12,7 +12,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomOAuth2User implements OAuth2User, UserDetails {
 
-    private final OAuth2Response oAuth2Response;
+    private final ResOAuth2 resOAuth2;
     private final String role;
 
     @Override
@@ -34,13 +34,13 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     @Override
     public String getName() {
-        return oAuth2Response.getName();
+        return resOAuth2.getName();
     }
 
     // UserDetails 인터페이스 구현
     @Override
     public String getUsername() {
-        return oAuth2Response.getEmail();
+        return resOAuth2.getEmail();
     }
 
     @Override

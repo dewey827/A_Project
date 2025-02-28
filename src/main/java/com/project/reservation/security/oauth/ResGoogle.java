@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class GoogleResponse implements OAuth2Response{
+public class ResGoogle implements ResOAuth2 {
 
     private final Map<String, Object> attribute;
 

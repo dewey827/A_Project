@@ -22,19 +22,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         System.out.println(oAuth2User.getAttributes());
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        final OAuth2Response oAuth2Response;
+        final ResOAuth2 resOAuth2;
 
         if (registrationId.equals("naver")) {
-            oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
+            resOAuth2 = new ResNaver(oAuth2User.getAttributes());
         } else if (registrationId.equals("google")) {
-            oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+            resOAuth2 = new ResGoogle(oAuth2User.getAttributes());
         } else {
             return null;
         }
 
-        String email = oAuth2Response.getEmail();
-        String provider = oAuth2Response.getProvider();
-        String providerId = oAuth2Response.getProviderId();
+        String email = resOAuth2.getEmail();
+        String provider = resOAuth2.getProvider();
+        String providerId = resOAuth2.getProviderId();
 
         Member member = memberRepository.findByEmail(email)
                 .map(existingMember -> {
@@ -44,8 +44,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .orElseGet(() -> {
                     Member newMember = Member.builder()
                             .email(email)
-                            .name("social_"+oAuth2Response.getName())
-                            .nickName("social_"+oAuth2Response.getName())
+                            .name("social_"+ resOAuth2.getName())
+                            .nickName("social_"+ resOAuth2.getName())
                             .roles(Role.USER)
                             .provider(provider)
                             .providerId(providerId)
@@ -55,6 +55,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     return memberRepository.save(newMember);
                 });
 
-        return new CustomOAuth2User(oAuth2Response,"ROLE_" + member.getRoles().name());
+        return new CustomOAuth2User(resOAuth2,"ROLE_" + member.getRoles().name());
     }
 }

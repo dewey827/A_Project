@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RequiredArgsConstructor
-public class NaverResponse implements OAuth2Response {
+public class ResNaver implements ResOAuth2 {
     private final Map<String, Object> attribute;
 
     @Override

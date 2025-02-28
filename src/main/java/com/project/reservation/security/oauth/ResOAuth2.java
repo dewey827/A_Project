@@ -1,6 +1,6 @@
 package com.project.reservation.security.oauth;
 
-public interface OAuth2Response {
+public interface ResOAuth2 {
 
     String getProvider();
 

@@ -42,6 +42,4 @@ public class MailController {
             return ResponseEntity.badRequest().body("메일 인증 실패 또는 만료된 코드입니다. 메일 인증을 다시 시도해주세요.");
         }
     }
-
-
 }
