@@ -3,7 +3,6 @@ package com.project.reservation.security.oauth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.security.jwt.JwtTokenUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-            throws IOException, ServletException {
+            throws IOException {
         CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String nickname = customOAuth2User.getName();
         String modifiedNickname = "social_" + nickname;
@@ -39,4 +38,3 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         response.getWriter().write(objectMapper.writeValueAsString(resMemberToken));
     }
 }
-
