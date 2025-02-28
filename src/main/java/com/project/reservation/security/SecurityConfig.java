@@ -5,7 +5,6 @@ import com.project.reservation.security.jwt.JwtAuthenticationFilter;
 
 import com.project.reservation.security.oauth.CustomOAuth2UserService;
 import com.project.reservation.security.oauth.OAuth2AuthenticationSuccessHandler;
-import com.project.reservation.security.oauth.OAuthJwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,13 +25,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
-
-    private final OAuthJwtAuthenticationFilter oAuthJwtAuthenticationFilter;
-
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-
-
 
     // AuthenticationManager - 인증을 담당하는 매니저. 사용자의 인증 정보(ID, 비밀번호 등)를 검증하고 인증 결과를 반환하는 역할
     // AuthenticationManager 를 생성하려면 AuthenticationConfiguration 을 주입받아서, getAuthenticationManager 메소드를 실행해야 함
@@ -72,8 +66,6 @@ public class SecurityConfig {
                                 "api/findId",
                                 "api/findPw/**",
 
-
-
                                 "/review/list",
                                 "/{reviewId}/comment/list",
                                 "/question/list",
@@ -98,7 +90,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(excep -> excep.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(oAuthJwtAuthenticationFilter, JwtAuthenticationFilter.class) // OAuth2 필터 추가
                 .build();
     }
 }

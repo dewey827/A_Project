@@ -25,8 +25,10 @@ public class ResReviewDetail {
     private int likes;
     private boolean hasLiked;   // 댓글은 dto 에서 제외
 
+    private List<ResComment> comments;
+
     @Builder
-    public ResReviewDetail(Long reviewId, String title, String nickName, String content, LocalDateTime createdDate, int views, int likes, boolean hasLiked) {
+    public ResReviewDetail(Long reviewId, String title, String nickName, String content, LocalDateTime createdDate, int views, int likes, boolean hasLiked, List<ResComment> comments) {
         this.reviewId = reviewId;
         this.title = title;
         this.nickName = nickName;
@@ -35,6 +37,7 @@ public class ResReviewDetail {
         this.views = views;
         this.likes = likes;
         this.hasLiked = hasLiked;
+        this.comments = comments;
     }
 
     // Entity -> DTO
@@ -47,7 +50,9 @@ public class ResReviewDetail {
                 .createdDate(review.getCreatedDate())
                 .views(review.getViews())
                 .likes(review.getLikes())
-
+                .comments(review.getComments().stream()
+                    .map(ResComment::fromEntity)
+                    .collect(Collectors.toList()))
                 .build();
     }
 }

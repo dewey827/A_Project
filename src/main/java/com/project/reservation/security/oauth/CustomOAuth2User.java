@@ -17,7 +17,7 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
 
     @Override
     public Map<String, Object> getAttributes() {
-        return null; // 실제 속성을 반환하도록 수정할 수 있습니다
+        return null;
     }
 
     @Override
@@ -40,12 +40,12 @@ public class CustomOAuth2User implements OAuth2User, UserDetails {
     // UserDetails 인터페이스 구현
     @Override
     public String getUsername() {
-        return oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
+        return oAuth2Response.getEmail();
     }
 
     @Override
     public String getPassword() {
-        return null; // OAuth2 로그인에서는 비밀번호가 필요하지 않음
+        return null;
     }
 
     @Override
