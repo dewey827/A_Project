@@ -31,33 +31,34 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             return null;
         }
-        String role = "ROLE_USER";
-        return new CustomOAuth2User(oAuth2Response, role);
+
+//        String role = "ROLE_USER";
+//        return new CustomOAuth2User(oAuth2Response, role);
 
 
-//        String email = oAuth2Response.getEmail();
-//        String provider = oAuth2Response.getProvider();
-//        String providerId = oAuth2Response.getProviderId();
-//
-//        Member member = memberRepository.findByEmail(email)
-//                .map(existingMember -> {
-//                    existingMember.updateOAuth2Info(provider, providerId);
-//                    return memberRepository.save(existingMember);
-//                })
-//                .orElseGet(() -> {
-//                    Member newMember = Member.builder()
-//                            .email(email)
-//                            .name(oAuth2Response.getName())
-//                            .nickName(oAuth2Response.getName()) // 임시로 이름을 닉네임으로 설정
-//                            .roles(Role.USER)
-//                            .provider(provider)
-//                            .providerId(providerId)
-//                            .addr("") // 필수 필드이므로 빈 문자열로 초기화
-//                            .birth("") // 필수 필드이므로 빈 문자열로 초기화
-//                            .build();
-//                    return memberRepository.save(newMember);
-//                });
-//
-//        return new CustomOAuth2User(oAuth2Response, member.getRoles().name());
+        String email = oAuth2Response.getEmail();
+        String provider = oAuth2Response.getProvider();
+        String providerId = oAuth2Response.getProviderId();
+
+        Member member = memberRepository.findByEmail(email)
+                .map(existingMember -> {
+                    existingMember.updateOAuth2Info(provider, providerId);
+                    return memberRepository.save(existingMember);
+                })
+                .orElseGet(() -> {
+                    Member newMember = Member.builder()
+                            .email(email)
+                            .name(oAuth2Response.getName())
+                            .nickName(oAuth2Response.getName()) // 임시로 이름을 닉네임으로 설정
+                            .roles(Role.USER)
+                            .provider(provider)
+                            .providerId(providerId)
+                            .addr("") // 필수 필드
+                            .birth("") // 필수 필드
+                            .build();
+                    return memberRepository.save(newMember);
+                });
+
+        return new CustomOAuth2User(oAuth2Response, member.getRoles().name());
     }
 }

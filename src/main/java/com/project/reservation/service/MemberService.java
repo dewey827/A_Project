@@ -120,6 +120,21 @@ public class MemberService {
         return ResMemberToken.fromEntity(foundMember, token);
     }
 
+    public ResMemberToken socialLogin(ReqMemberLogin reqMemberLogin) {
+        // authenticate 메소드에 (로그인 요청 DTO 의 email, 로그인 요청 DTO 의 password)
+        authenticate(reqMemberLogin.getEmail(), reqMemberLogin.getPassword());
+        // customUserDetailsService 에서 반환되는 UserDetails 객체를 foundMember 이름으로 대입
+        UserDetails foundMember = customUserDetailsService.loadUserByUsername(reqMemberLogin.getEmail());
+        // checkStoredPasswordInDB 메소드로 입력된 비밀번호가 DB 에 저장된 암호화된 비밀번호와 같은지 체크
+        checkStoredPasswordInDB(reqMemberLogin.getPassword(), foundMember.getPassword());
+
+        String nickName = ((Member) foundMember).getNickName();
+        // foundMember 로 토큰 생성
+        String token = jwtTokenUtil.generateToken(foundMember, nickName);
+        // 클라이언트에게 응답으로 토큰 보냄
+        return ResMemberToken.fromEntity(foundMember, token);
+    }
+
     // 수정
     public ResMember update(Member member, ReqMemberUpdate reqMemberUpdate) {
         // 새 비밀번호 암호화

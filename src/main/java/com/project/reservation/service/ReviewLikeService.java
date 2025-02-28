@@ -60,7 +60,7 @@ public class ReviewLikeService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
-        boolean hasLiked = reviewLikeRepository.existsByReviewAndMember(review, member);
+//        boolean hasLiked = reviewLikeRepository.existsByReviewAndMember(review, member);
 
         //특정 사용자가 특정 리뷰를 좋아요했는지 여부 반환
         return reviewLikeRepository.existsByReviewAndMember(review, member);

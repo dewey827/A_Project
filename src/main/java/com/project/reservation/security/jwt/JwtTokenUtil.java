@@ -143,8 +143,6 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
-
-
     public String refreshToken(String token) {
         final Date createdDate = new Date();
         final Date expirationDate = calculateExpirationDate(createdDate);

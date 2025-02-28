@@ -68,12 +68,18 @@ public class ReviewService {
 
     // 리뷰 등록
     public ResReviewDetail createReview(ReqReviewWrite reqReviewWrite, Member member) {
-        // 요청 데이터를 Review 엔티티로 변환
-        Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
+
         // 작성자 회원 정보 조회
         Member writerMember = memberRepository.findById(member.getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
+
+        // reqReviewWrite의 nickName을 작성자의 실제 nickName으로 설정
+        reqReviewWrite.setNickName(writerMember.getNickName());
+
+        // 요청 데이터를 Review 엔티티로 변환
+        Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
+
         // 리뷰에 작성자 매핑
         review.setMember(writerMember);
 
