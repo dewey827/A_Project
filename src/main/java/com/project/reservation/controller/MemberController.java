@@ -72,7 +72,7 @@ public class MemberController {
     }
 
     // 삭제
-    @DeleteMapping("/{memberId}/delete")
+    @DeleteMapping("/delete")
     public ResponseEntity<Long> delete(
             @PathVariable("memberId") Long memberId,
             @AuthenticationPrincipal Member member) {
