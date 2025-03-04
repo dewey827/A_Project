@@ -9,15 +9,15 @@ import com.project.reservation.service.MailService;
 import com.project.reservation.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -82,10 +82,10 @@ public class MemberController {
 
     // !! 관리자용 !!
     @GetMapping("/deletedMember")
-    public ResponseEntity<List<DeletedMember>> getAllDeletedMembers() {
-
-        List<DeletedMember> deletedMembers = memberService.getAllDeletedMember();
-        return new ResponseEntity<>(deletedMembers, HttpStatus.OK);
+    public ResponseEntity<Page<DeletedMember>> deletedMemberList(
+            @PageableDefault(size = 8, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<DeletedMember> deletedMembers = memberService.getAllDeletedMember(pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(deletedMembers);
     }
 
     //====================================================================================================
@@ -143,7 +143,6 @@ public class MemberController {
     public ResponseEntity<ResMember> myPagePasswordCheck(
             @AuthenticationPrincipal Member member,
             @RequestBody ReqMemberMyPage reqMemberMyPage) {
-        log.info("memcon - myPageCheck 사용됨1");
         ResMember resMember = memberService.myPageCheck(member, reqMemberMyPage.getPassword());
 
         return ResponseEntity.ok(resMember);

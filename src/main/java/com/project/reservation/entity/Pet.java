@@ -19,7 +19,8 @@ public class Pet {
     private String name;
 
     @Column(nullable = false)
-    private String breed;
+    @Enumerated(EnumType.STRING)
+    private Breed breed;
 
     @Column(nullable = false)
     private int age;
@@ -30,7 +31,7 @@ public class Pet {
     public Member member;
     //======================================================================================
     @Builder
-    public Pet( Long id, String name, String breed, int age, Member member) {
+    public Pet( Long id, String name, Breed breed, int age, Member member) {
         this.id = id;
         this.name = name;
         this.breed = breed;
@@ -45,7 +46,7 @@ public class Pet {
     }
 
     //동물정보 수정
-    public void updatePet(String name, String breed, int age) {
+    public void updatePet(String name, Breed breed, int age) {
         this.name = name;
         this.breed = breed;
         this.age = age;

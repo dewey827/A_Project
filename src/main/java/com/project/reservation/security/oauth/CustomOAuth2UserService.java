@@ -54,7 +54,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             .build();
                     return memberRepository.save(newMember);
                 });
-
         return new CustomOAuth2User(resOAuth2,"ROLE_" + member.getRoles().name());
     }
 }

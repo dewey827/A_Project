@@ -10,26 +10,25 @@ import com.project.reservation.dto.response.member.ResMember;
 import com.project.reservation.dto.response.member.ResMemberToken;
 import com.project.reservation.entity.DeletedMember;
 import com.project.reservation.entity.Member;
-import com.project.reservation.entity.Pet;
 import com.project.reservation.repository.*;
 import com.project.reservation.security.jwt.CustomUserDetailsService;
 import com.project.reservation.security.jwt.JwtTokenUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -106,6 +105,10 @@ public class MemberService {
     
     // 로그인
     public ResMemberToken login(ReqMemberLogin reqMemberLogin) {
+        // 삭제된 회원 확인
+        if (deletedMemberRepository.existsByEmail(reqMemberLogin.getEmail())) {
+            throw new MemberException("탈퇴한 회원입니다. 새로운 계정으로 가입해주세요.", HttpStatus.BAD_REQUEST);
+        }
         // authenticate 메소드에 (로그인 요청 DTO 의 email, 로그인 요청 DTO 의 password)
         authenticate(reqMemberLogin.getEmail(), reqMemberLogin.getPassword());
         // customUserDetailsService 에서 반환되는 UserDetails 객체를 foundMember 이름으로 대입
@@ -153,10 +156,6 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException("회원정보가 존재하지 않습니다.", HttpStatus.BAD_REQUEST));
 
-        if (!member.getId().equals(currentMember.getId())) {
-            throw new MemberException("본인 계정만 탈퇴할 수 있습니다.", HttpStatus.BAD_REQUEST);
-        }
-
         DeletedMember deletedMember = DeletedMember.builder()
                 .originalId(member.getId())
                 .name(member.getName())
@@ -180,8 +179,10 @@ public class MemberService {
     }
 
     // 탈퇴 회원 조회
-    public List<DeletedMember> getAllDeletedMember() {
-        List<DeletedMember> deletedMembers = deletedMemberRepository.findAll();
+    public Page<DeletedMember> getAllDeletedMember(Pageable pageable) {
+        // Repository에서 Pageable을 활용해 페이징 처리된 데이터를 가져옴
+        Page<DeletedMember> deletedMembers = deletedMemberRepository.findAll(pageable);
+
         if (deletedMembers.isEmpty()) {
             throw new MemberException("보관중인 탈퇴 회원이 없습니다.", HttpStatus.BAD_REQUEST);
         }

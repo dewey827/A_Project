@@ -1,5 +1,6 @@
 package com.project.reservation.dto.response.pet;
 
+import com.project.reservation.entity.Breed;
 import com.project.reservation.entity.Pet;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,11 +14,11 @@ import lombok.Setter;
 public class ResPet {
 
     private String name;
-    private String breed;
+    private Breed breed;
     private int age;
 
     @Builder
-    public ResPet(String name, String breed, int age) {
+    public ResPet(String name, Breed breed, int age) {
         this.name = name;
         this.breed = breed;
         this.age = age;

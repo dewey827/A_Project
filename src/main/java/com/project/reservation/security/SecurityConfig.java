@@ -66,6 +66,8 @@ public class SecurityConfig {
                                 "api/findId",
                                 "api/findPw/**",
 
+                                "api/deletedMember",
+
                                 "/review/list",
                                 "/{reviewId}/comment/list",
                                 "/question/list",
