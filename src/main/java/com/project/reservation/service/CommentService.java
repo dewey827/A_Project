@@ -1,7 +1,7 @@
 package com.project.reservation.service;
 
+import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.common.exception.ResourceNotFoundException;
-import com.project.reservation.common.exception.ReviewException;
 import com.project.reservation.dto.request.comment.ReqComment;
 import com.project.reservation.dto.response.comment.ResComment;
 import com.project.reservation.entity.Comment;
@@ -72,7 +72,7 @@ public class CommentService {
 
         // 현재 사용자가 댓글 작성자인지 확인
         if (!comment.getMember().getId().equals(currentMember.getId())) {
-            throw new ReviewException("댓글 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+            throw new MemberException("댓글 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
         comment.update(reqComment.getContent());
         Comment newComment = commentRepository.save(comment);
@@ -86,7 +86,7 @@ public class CommentService {
 
         // 현재 사용자가 댓글 작성자인지 확인
         if (!comment.getMember().getId().equals(currentMember.getId())) {
-            throw new ReviewException("댓글 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
+            throw new MemberException("댓글 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
 
         commentRepository.deleteById(commentId);

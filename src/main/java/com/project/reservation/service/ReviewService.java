@@ -3,7 +3,6 @@ package com.project.reservation.service;
 import com.project.reservation.common.SearchDto;
 import com.project.reservation.common.exception.MemberException;
 import com.project.reservation.common.exception.ResourceNotFoundException;
-import com.project.reservation.common.exception.ReviewException;
 import com.project.reservation.dto.request.review.ReqReviewUpdate;
 import com.project.reservation.dto.request.review.ReqReviewWrite;
 import com.project.reservation.dto.response.review.ResReviewDetail;
@@ -108,7 +107,7 @@ public class ReviewService {
 
         // 현재 로그인한 사용자와 리뷰 작성자 비교
         if (!review.getMember().getId().equals(currentMember.getId())) {
-            throw new ReviewException("후기 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
+            throw new MemberException("후기 작성자만 수정할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
         // 리뷰 내용 수정
         review.update(reqReviewUpdate.getTitle(), reqReviewUpdate.getContent());
@@ -127,7 +126,7 @@ public class ReviewService {
 
         // 현재 로그인한 사용자와 리뷰 작성자 비교
         if (!review.getMember().getId().equals(currentMember.getId())) {
-            throw new ReviewException("후기 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
+            throw new MemberException("후기 작성자만 삭제할 수 있습니다.", HttpStatus.BAD_REQUEST);
         }
 
         reviewRepository.deleteById(reviewId);
