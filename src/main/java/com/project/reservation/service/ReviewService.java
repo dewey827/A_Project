@@ -13,6 +13,7 @@ import com.project.reservation.repository.MemberRepository;
 import com.project.reservation.repository.ReviewRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
@@ -65,23 +66,21 @@ public class ReviewService {
 
     // 리뷰 등록
     public ResReviewDetail createReview(ReqReviewWrite reqReviewWrite, Member member) {
-
+        // 요청 데이터를 Review 엔티티로 변환
+        Review review = ReqReviewWrite.ofEntity(reqReviewWrite, member.getNickName());
+        log.info("0");
         // 작성자 회원 정보 조회
         Member writerMember = memberRepository.findById(member.getId()).orElseThrow(
                 () -> new ResourceNotFoundException("Member", "Member Email", member.getEmail())
         );
-
-        // reqReviewWrite의 nickName을 작성자의 실제 nickName으로 설정
-        reqReviewWrite.setNickName(writerMember.getNickName());
-
-        // 요청 데이터를 Review 엔티티로 변환
-        Review review = ReqReviewWrite.ofEntity(reqReviewWrite);
-
+        log.info("0.5");
         // 리뷰에 작성자 매핑
         review.setMember(writerMember);
+        log.info("1");
 
         // 리뷰 저장
         Review saveReview = reviewRepository.save(review);
+        log.info("2");
         // 저장된 리뷰 데이터 반환
         return ResReviewDetail.fromEntity(saveReview);
     }

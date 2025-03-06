@@ -22,14 +22,10 @@ public class ReviewLikeService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public String toggleLike(ReqReviewLike reqReviewLike) {
+    public String toggleLike(ReqReviewLike reqReviewLike, Member member) {
         //리뷰 ID로 조회, 없으면 예외
         Review review = reviewRepository.findById(reqReviewLike.getReviewId())
                 .orElseThrow(() -> new RuntimeException("Review not found"));
-
-        //멤버 ID로 조회, 없으면 예외
-        Member member = memberRepository.findById(reqReviewLike.getMemberId())
-                .orElseThrow(() -> new RuntimeException("Member not found"));
 
         //기존 좋아요 여부 확인
         Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndMember(review, member);

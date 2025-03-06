@@ -105,18 +105,6 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.password = newPassword;
     }
 
-    public void setPets(List<Pet> pets) {
-        this.pets = new ArrayList<>();
-        if (pets != null) {
-            for (Pet pet : pets) {
-                this.pets.add(pet);
-                pet.setMember(this);
-            }
-        }
-    }
-
-
-
 //    // 동물 추가
 //    public void addPet(Pet pet) {
 //        pet.setMember(this);

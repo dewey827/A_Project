@@ -10,13 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReqReviewLike {
 
-    private Long memberId;
     private Long reviewId;
 
     @Builder
-    public ReqReviewLike(Long memberId, Long reviewId) {
-        this.memberId = memberId;
+    public ReqReviewLike(Long reviewId) {
         this.reviewId = reviewId;
-
     }
 }
