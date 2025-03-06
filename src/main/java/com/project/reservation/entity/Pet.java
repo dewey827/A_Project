@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class Pet {
 
     @Id @GeneratedValue
-    @Column(name = "PET_ID")
+//    @Column(name = "PET_ID")
     private Long id;
 
     @Column(nullable = false, length = 10)
@@ -26,9 +26,10 @@ public class Pet {
     private int age;
 
     //======================================================================================
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn
-    public Member member;
+    private Member member;
+
     //======================================================================================
     @Builder
     public Pet( Long id, String name, Breed breed, int age, Member member) {

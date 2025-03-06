@@ -28,6 +28,7 @@ public class ReqPet {
 
     public static Pet ofEntity(ReqPet reqPet, Member member) {
         return Pet.builder()
+                .id(reqPet.getId())
                 .name(reqPet.getName())
                 .breed(reqPet.getBreed())
                 .age(reqPet.getAge())
