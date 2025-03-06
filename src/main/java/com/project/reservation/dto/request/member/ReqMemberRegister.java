@@ -45,7 +45,7 @@ public class ReqMemberRegister {
 
     // DTO -> Entity
     public static Member ofEntity(ReqMemberRegister reqMemberRegister) {
-        return Member.builder()
+        Member member = Member.builder()
                 .name(reqMemberRegister.getName())
                 .email(reqMemberRegister.getEmail())
                 .password(reqMemberRegister.getPassword())
@@ -54,17 +54,24 @@ public class ReqMemberRegister {
                 .birth(reqMemberRegister.getBirth())
                 .phone(reqMemberRegister.getPhone())
                 .roles(Role.USER)
-                .pets(reqMemberRegister.getPets() != null
-                        ? reqMemberRegister.getPets().stream()
-                        .map(reqPet -> Pet.builder()
-                                .name(reqPet.getName())
-                                .breed(reqPet.getBreed())
-                                .age(reqPet.getAge())
-                                .build())
-                        .collect(Collectors.toList())
-                        : null)
                 .build();
+
+        if (reqMemberRegister.getPets() != null) {
+            List<Pet> pets = reqMemberRegister.getPets().stream()
+                    .map(reqPet -> Pet.builder()
+                            .name(reqPet.getName())
+                            .breed(reqPet.getBreed())
+                            .age(reqPet.getAge())
+                            .member(member)  // 여기서 member 설정
+                            .build())
+                    .collect(Collectors.toList());
+            member.setPets(pets);
+        }
+
+        return member;
     }
+
+
 
 
 }

@@ -60,7 +60,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
     private List<Review> reviews;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Pet> pets;
+    private List<Pet> pets = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "member",fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 //    private List<Question> questions;
@@ -88,6 +88,11 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.pets = pets;
     }
 
+    public void setPets(List<Pet> pets) {
+        this.pets = pets;
+    }
+
+
     public void updateOAuth2Info(String provider, String providerId) {
         this.provider = provider;
         this.providerId = providerId;
@@ -104,18 +109,6 @@ public class Member extends BaseTimeEntity implements UserDetails {
     public void resetPassword(String newPassword){
         this.password = newPassword;
     }
-
-//    // 동물 추가
-//    public void addPet(Pet pet) {
-//        pet.setMember(this);
-//        this.pets.add(pet);
-//    }
-//
-//    // 동물 삭제
-//    public void removePet(Pet pet) {
-//        pet.setMember(null);
-//        this.pets.remove(pet);
-//    }
 
     //======================================================================================
     // implements Userdetails - 스프링 시큐리티 overrider 메소드
