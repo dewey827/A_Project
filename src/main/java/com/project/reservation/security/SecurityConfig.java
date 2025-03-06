@@ -60,11 +60,12 @@ public class SecurityConfig {
                 // requestMatchers - 특정 HTTP 요청에 대한 보안 규칙을 정의하는 데 사용되는 메소드
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/api/login",
+                                "/api/login/**",
                                 "/api/register",
                                 "api/email/**",
                                 "api/findId",
                                 "api/findPw/**",
+                                "api/nonMember/**",
 
                                 "/review/list",
                                 "/{reviewId}/comment/list",

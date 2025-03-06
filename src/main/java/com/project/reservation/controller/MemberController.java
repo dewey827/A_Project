@@ -61,6 +61,25 @@ public class MemberController {
         ResMemberToken resMemberToken = memberService.login(reqMemberLogin);
         return  ResponseEntity.status(HttpStatus.OK).header(resMemberToken.getToken()).body(resMemberToken);
     }
+
+
+    @GetMapping("/login/{provider}")
+    public ResponseEntity<String> getLoginUrl(@PathVariable("provider") String provider) {
+        String loginUrl = "/oauth2/authorization/" + provider;
+        return ResponseEntity.ok(loginUrl);
+    }
+
+    @GetMapping("/login/success")
+    public ResponseEntity<String> loginSuccess() {
+        return ResponseEntity.ok("Social login successful");
+    }
+
+    @GetMapping("/login/failure")
+    public ResponseEntity<String> loginFailure() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Social login failed");
+    }
+
+
     //====================================================================================================
     // 수정
     @PatchMapping("/{memberId}/update")

@@ -74,7 +74,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
     //=============================================================
     @Builder
     public Member(String name, String email, String password, String nickName, String addr,
-                  String birth, String phone, Role roles, String provider, String providerId) {
+                  String birth, String phone, Role roles, String provider, String providerId, List<Pet> pets) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -85,6 +85,7 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.roles = roles;
         this.provider = provider;
         this.providerId = providerId;
+        this.pets = pets;
     }
 
     public void updateOAuth2Info(String provider, String providerId) {
@@ -104,17 +105,29 @@ public class Member extends BaseTimeEntity implements UserDetails {
         this.password = newPassword;
     }
 
-    // 동물 추가
-    public void addPet(Pet pet) {
-        pet.setMember(this);
-        this.pets.add(pet);
+    public void setPets(List<Pet> pets) {
+        this.pets = new ArrayList<>();
+        if (pets != null) {
+            for (Pet pet : pets) {
+                this.pets.add(pet);
+                pet.setMember(this);
+            }
+        }
     }
 
-    // 동물 삭제
-    public void removePet(Pet pet) {
-        pet.setMember(null);
-        this.pets.remove(pet);
-    }
+
+
+//    // 동물 추가
+//    public void addPet(Pet pet) {
+//        pet.setMember(this);
+//        this.pets.add(pet);
+//    }
+//
+//    // 동물 삭제
+//    public void removePet(Pet pet) {
+//        pet.setMember(null);
+//        this.pets.remove(pet);
+//    }
 
     //======================================================================================
     // implements Userdetails - 스프링 시큐리티 overrider 메소드
