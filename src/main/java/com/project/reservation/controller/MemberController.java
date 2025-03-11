@@ -166,4 +166,15 @@ public class MemberController {
 
         return ResponseEntity.ok(resMember);
     }
+
+
+    @GetMapping("/myProfile")
+    public ResponseEntity<ResMember> myProfile(@AuthenticationPrincipal Member member) {
+        ResMember resMember = memberService.myProfile(member);
+        return ResponseEntity.ok(resMember);
+    }
+
+
+
+
 }

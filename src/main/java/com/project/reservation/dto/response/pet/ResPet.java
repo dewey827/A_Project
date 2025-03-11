@@ -12,13 +12,14 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class ResPet {
-
+    private Long id;
     private String name;
     private Breed breed;
     private int age;
 
     @Builder
-    public ResPet(String name, Breed breed, int age) {
+    public ResPet(Long id,String name, Breed breed, int age) {
+        this.id = id;
         this.name = name;
         this.breed = breed;
         this.age = age;
@@ -26,6 +27,7 @@ public class ResPet {
 
     public static ResPet fromEntity(Pet pet) {
         return ResPet.builder()
+                .id(pet.getId())
                 .name(pet.getName())
                 .breed(pet.getBreed())
                 .age(pet.getAge())
